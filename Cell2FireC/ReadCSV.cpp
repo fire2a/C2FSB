@@ -29,7 +29,7 @@ std::vector<std::vector<std::string>> CSVReader::getData(){
 	std::ifstream file(this->fileName);
 	std::vector<std::vector<std::string> > dataList;
 	std::string line = "";
-	
+
 	// Iterate through each line and split the content using delimeter
 	while (getline(file, line))
 	{
@@ -79,7 +79,6 @@ void CSVReader::parseDF(inputs * df_ptr, std::vector<std::vector<std::string>> &
 	
 	// Loop over cells (populating per row)
 	for (i=1; i <= NCells; i++){
-		//printf("Populating DF for cell %d\n", i);
 		faux = DF[i][0].append(" ").c_str();
 		
 		if (DF[i][3].compare("") == 0) elev = 0;
@@ -322,7 +321,6 @@ void CSVReader::parseForestDF(forestDF * frt_ptr, std::vector<std::vector<std::s
 	std::string::size_type sz;   // alias of size_t
 	std::unordered_map<std::string, int> Aux;
 	std::vector<int> Aux2;
-
 	cols = std::stoi(DF[0][1], &sz);
 	rows = std::stoi(DF[1][1], &sz);
 
