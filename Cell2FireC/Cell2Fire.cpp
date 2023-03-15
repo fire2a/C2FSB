@@ -494,7 +494,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		CSVWriter CSVFolder("","");
 		this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator();
 		CSVFolder.MakeDir(this->gridFolder);
-		this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim);
+		//this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim);
 		this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
 
 		//DEBUGstd::cout << "\nInitial Grid folder was generated in " << this->gridFolder << std::endl;
@@ -525,9 +525,9 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	//Flame Length Folder
 	if (this->args.OutFl) {
 		CSVWriter CSVFolder("", "");
-		this->messagesFolder = "mkdir -p " + this->args.OutFolder + "/FlameLength/";
+		this->messagesFolder = this->args.OutFolder+separator() + "FlameLength";
 		CSVFolder.MakeDir(this->messagesFolder);
-		this->messagesFolder = this->args.OutFolder + "/FlameLength/";
+		this->messagesFolder = this->args.OutFolder +separator() + "FlameLength"+separator();
 	}
 	//Crown Folder
 	if (this->args.OutCrown && this->args.AllowCROS) {
@@ -539,9 +539,9 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		//Crown Fraction Burn Folder
 	if (this->args.OutCrownConsumption && this->args.AllowCROS) {
 		CSVWriter CSVFolder("", "");
-		this->messagesFolder = "mkdir -p " + this->args.OutFolder + "/CrownFractionBurn/";
+		this->messagesFolder = this->args.OutFolder + separator() + "CrownFractionBurn";
 		CSVFolder.MakeDir(this->messagesFolder);
-		this->messagesFolder = this->args.OutFolder + "/CrownFractionBurn/";
+		this->messagesFolder = this->args.OutFolder + separator() +"CrownFractionBurn" + separator();
 	}
 		
 	// Random Weather 

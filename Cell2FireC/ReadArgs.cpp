@@ -108,7 +108,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		printf("OutCrown: %d \n", out_crown);
 	}
 	
-	if (cmdOptionExists(argv, argv + argc, "--out-crown-consumption")) {
+	if (cmdOptionExists(argv, argv + argc, "--out-cfb")) {
 		out_crown_consumption = true;
 		printf("OutCrownConsumption: %d \n", out_crown_consumption);
 	}
