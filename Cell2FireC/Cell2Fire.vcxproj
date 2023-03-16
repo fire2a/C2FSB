@@ -103,7 +103,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>c:/dev/boost_1_81_0; c:/dev/dirent; c:/dev/eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:/Users/ferna/source/lib/boost_1_81_0; C:/Users/ferna/source/lib/dirent; C:/Users/ferna/source/lib/eigen-3.4.0</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
