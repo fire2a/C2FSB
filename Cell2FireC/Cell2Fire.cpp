@@ -692,7 +692,8 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->crownFraction = std::vector<float> (this->nCells, 0);
 	this->Intensities = std::vector<float> (this->nCells, 0);
 	this->RateOfSpreads = std::vector<float> (this->nCells, 0);
-	
+	this->FlameLengths = std::vector<float> (this->nCells, 0);
+
 	this->FSCell.clear();
 	this->crownMetrics.clear();//intensity and crown
 	
