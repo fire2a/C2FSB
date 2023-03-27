@@ -160,10 +160,8 @@ void CSVWriter::printCSVDouble(int rows, int cols, std::vector<double> network)
 
 // Ofstream version to save faster
 void CSVWriter::printCSVDouble_V2(int rows, int cols, std::vector<double> network) {
-
 	bool outs = false;
 	std::ofstream ofs(this->fileName, std::ofstream::out);
-
 	for (int r = 0; r < rows; r++)
 	{
 		for (int c = 0; c < cols; c++)
@@ -172,7 +170,6 @@ void CSVWriter::printCSVDouble_V2(int rows, int cols, std::vector<double> networ
 				outs = true;
 				break;
 			}
-
 			ofs << (int)network[c + r * cols] << this->delimeter << (int)network[c + r * cols + 1] << this->delimeter << (int)network[c + r * cols + 2] << this->delimeter << network[c + r * cols + 3] << "\n";
 			c += cols;
 		}

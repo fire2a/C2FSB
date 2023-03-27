@@ -488,15 +488,14 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->done = false;
 	this->fire_period = vector<int>(this->args.TotalYears, 0);
 	this->sim = simExt;
-
 	// Initial status grid folder
-	if(this->args.OutputGrids){
+	if(this->args.OutputGrids || this->args.FinalGrid){
 		CSVWriter CSVFolder("","");
 		this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator();
 		CSVFolder.MakeDir(this->gridFolder);
 		//this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim);
 		this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
-
+		CSVFolder.MakeDir(this->gridFolder);
 		//DEBUGstd::cout << "\nInitial Grid folder was generated in " << this->gridFolder << std::endl;
 	}
 	
@@ -1333,7 +1332,8 @@ void Cell2Fire::Results(){
 			std::cout  << "We are generating the network messages to a csv file " << messagesName << std::endl;
 		}
 		CSVWriter CSVPloter(messagesName, ",");
-		CSVPloter.printCSVDouble_V2(this->FSCell.size() - this->nIgnitions, 4, this->FSCell);
+
+		CSVPloter.printCSVDouble_V2(this->FSCell.size()/4, 4, this->FSCell);
 	}
 
 
