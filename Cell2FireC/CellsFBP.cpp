@@ -5,7 +5,6 @@
 #include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"
-#define _USE_MATH_DEFINES
 // Include libraries
 #include <stdio.h>
 #include <stdlib.h>
