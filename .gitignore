@@ -54,6 +54,6 @@ venv/
 *swo
 *~
 
-/Cell2Fire/x64
-/Cell2Fire/Cell2Fire.pdb
-.htm
+*.htm
+/Cell2FireC/x64
+*.pdb
