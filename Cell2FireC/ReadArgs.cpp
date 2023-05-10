@@ -8,6 +8,15 @@
 #include <string>
 #include <algorithm>
 
+inline char separator()
+{
+#if defined _WIN32 || defined __CYGWIN__
+	return '\\';
+#else
+	return '/';
+#endif
+}
+
 
 char* getCmdOption(char ** begin, char ** end, const std::string & option)
 {
@@ -33,6 +42,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 
 	// Empty default
 	char empty = '\0';
+
 
 	// Strings
 	//--input-instance-folder
@@ -402,6 +412,10 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	}
 	else args_ptr->InFolder = input_folder; 
 	
+	if (!args_ptr->InFolder.empty() && *args_ptr->InFolder.rbegin()!= separator()){
+		args_ptr->InFolder+=separator();
+	}
+
 	if (output_folder == &empty && input_folder != &empty){
 		args_ptr->OutFolder = args_ptr->InFolder + "simOuts";
 	} else if(output_folder == &empty && input_folder == &empty){
@@ -410,6 +424,10 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		args_ptr->OutFolder = output_folder;
 	} else if(output_folder != &empty && input_folder != &empty){
 		args_ptr->OutFolder = output_folder;
+	}
+
+	if (!args_ptr->OutFolder.empty() && *args_ptr->OutFolder.rbegin()!= separator()){
+		args_ptr->OutFolder+=separator();
 	}
 		
 	if (input_weather == &empty){
