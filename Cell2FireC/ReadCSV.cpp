@@ -29,14 +29,35 @@ std::vector<std::vector<std::string>> CSVReader::getData(){
 	std::ifstream file(this->fileName);
 	std::vector<std::vector<std::string> > dataList;
 	std::string line = "";
-	
-	// Iterate through each line and split the content using delimeter
-	while (getline(file, line))
-	{
+// Iterate through each line and split the content using delimeter
+	if(this->fileName.substr(this->fileName.find_last_of(".") + 1) == "asc"){
+		int header=0;
+		std::string tab_delimiter="\t"+","+this->delimiter;
+		while (getline(file, line)){
+			if (header<5){
+				std::vector<std::string> vec;
+				boost::algorithm::split(vec, line, boost::is_any_of(tab_delimiter));
+				dataList.push_back(vec);
+				header++;
+			}
+			else{
+				std::vector<std::string> vec;
+				boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
+				dataList.push_back(vec);
+			}
+
+		}
+	}
+
+	else{
+		while (getline(file, line)){
 		std::vector<std::string> vec;
 		boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
 		dataList.push_back(vec);
+		}
 	}
+	
+
 	// Close the File
 	file.close();
  
