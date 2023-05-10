@@ -44,6 +44,7 @@ class Cell2Fire {
 		 int sim;
 		 int rows;
 		 int cols;
+		 int widthSims;
 		 int weatherPeriod = 0;
 		 int year = 1;
 		 int gridNumber = 0;
@@ -71,6 +72,10 @@ class Cell2Fire {
 		 string gridFolder;
 		 string messagesFolder;
 		 string rosFolder;
+		 string crownFolder;
+		 string intensityFolder;
+		 string cfbFolder;
+		 string flFolder;
 		 string historyFolder;
 	
 		 // Vectors
