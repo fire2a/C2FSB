@@ -76,7 +76,7 @@ void printSets(std::unordered_set<int> availCells, std::unordered_set<int> nonBu
 	std::cout << std::endl;
 	
 	
-	std::cout << "Harvested Cells:";
+	std::cout << "Firebreak Cells:";
 	for (auto & hc : harvestCells){
 			std::cout << " " << hc;
 	}
@@ -230,7 +230,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 		CSVHPlan.parseHarvestedDF(HarvestedCells, HarvestedDF, HCellsP);
 		
 		// Print-out
-		std::cout << "\nTo Harvest Cells :" << std::endl;
+		std::cout << "\nFirebreak Cells :" << std::endl;
 		for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++ ){
 			std::cout << " " << it->first << ": ";
 				for (auto & it2 : it->second){
@@ -1286,7 +1286,7 @@ void Cell2Fire::Results(){
 	std::cout << "Total Available Cells:    " << ACells << " - % of the Forest: " <<  ACells/nCells*100.0 << "%" << std::endl;
 	std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " <<  BCells/nCells*100.0 <<"%" << std::endl;
 	std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " <<  NBCells/nCells*100.0 <<"%"<< std::endl;
-	std::cout << "Total Harvested Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
+	std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
 
 	// Final Grid 
 	if(this->args.FinalGrid){

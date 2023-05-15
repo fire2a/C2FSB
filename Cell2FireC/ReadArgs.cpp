@@ -66,10 +66,10 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 	}
 	else input_weather = &empty;
 
-	//--HarvestPlan
-	char* input_hplan = getCmdOption(argv, argv + argc, "--HarvestPlan");
+	//--FirebreakPlan
+	char* input_hplan = getCmdOption(argv, argv + argc, "--FirebreakPlan");
 	if (input_hplan) {
-		printf("HarvestPlan: %s \n", input_hplan);
+		printf("FirebreakPlan: %s \n", input_hplan);
 	}
 	else input_hplan = &empty;
 

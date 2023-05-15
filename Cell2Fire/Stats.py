@@ -180,10 +180,10 @@ class Statistics(object):
         # Populate DF
         filePath = os.path.join(self._StatsFolder, "FinalStats.csv")
         DF = pd.read_csv(filePath)
-        DF = DF[["Burned", "NonBurned", "Harvested"]]
+        DF = DF[["Burned", "NonBurned", "Firebreak"]]
 
         # Plot
-        my_pal = {"Burned": "r", "NonBurned": "g", "Harvested":"b"}
+        my_pal = {"Burned": "r", "NonBurned": "g", "Firebreak":"b"}
         ax = sns.boxplot(data=DF, linewidth=2.5, palette=my_pal).set(xlabel="Final State", ylabel="Hectares")
 
         # Save it
@@ -820,7 +820,7 @@ class Statistics(object):
                     else:
                         a = np.zeros([self._Rows,self._Cols]).astype(np.int64)
 
-                # Set harvested to null prob
+                # Set Firebreak to null prob
                 a[a == 2] = 0
                 #print("a:", a)
 
@@ -1029,7 +1029,7 @@ class Statistics(object):
         a = 0
         b = []
         statDict = {}
-        statDF = pd.DataFrame(columns=[["ID", "NonBurned", "Burned", "Harvested"]])
+        statDF = pd.DataFrame(columns=[["ID", "NonBurned", "Burned", "Firebreak"]])
 
         # Stats per simulation
         for i in range(self._nSims):
@@ -1042,7 +1042,7 @@ class Statistics(object):
                 statDict[i] = {"ID": i+1,
                                "NonBurned": len(a[(a == 0) | (a == 2)]),
                                "Burned": len(a[a == 1]),
-                               "Harvested": len(a[a == -1])}
+                               "Firebreak": len(a[a == -1])}
             else:
                 if i != 0:
                     a = np.zeros([a.shape[0], a.shape[1]]).astype(np.int64)
@@ -1050,23 +1050,23 @@ class Statistics(object):
                     statDict[i] = {"ID": i+1,
                                    "NonBurned": len(a[(a == 0) | (a == 2)]),
                                    "Burned": len(a[a == 1]),
-                                   "Harvested": len(a[a == -1])}
+                                   "Firebreak": len(a[a == -1])}
                 else:
                     a = np.zeros([self._Rows,self._Cols]).astype(np.int64)
                     b.append(a)
                     statDict[i] = {"ID": i+1,
                                    "NonBurned": len(a[(a == 0) | (a == 2)]),
                                    "Burned": len(a[a == 1]),
-                                   "Harvested": len(a[a == -1])}
+                                   "Firebreak": len(a[a == -1])}
 
         # Generate CSV files
         if self._CSVs:
             # Dict to DataFrame
             A = pd.DataFrame(data=statDict, dtype=np.int32)
             A = A.T
-            A = A[["ID", "NonBurned", "Burned", "Harvested"]]
-            Aux = (A["NonBurned"] + A["Burned"] + A["Harvested"])
-            A["%NonBurned"], A["%Burned"], A["%Harvested"] = A["NonBurned"] / Aux, A["Burned"] / Aux, A["Harvested"] / Aux
+            A = A[["ID", "NonBurned", "Burned", "Firebreak"]]
+            Aux = (A["NonBurned"] + A["Burned"] + A["Firebreak"])
+            A["%NonBurned"], A["%Burned"], A["%Firebreak"] = A["NonBurned"] / Aux, A["Burned"] / Aux, A["Firebreak"] / Aux
             A.to_csv(os.path.join(self._StatsFolder, "FinalStats.csv"),
                      columns=A.columns, index=False, header=True,
                      float_format='%.3f')
@@ -1077,7 +1077,7 @@ class Statistics(object):
             # Info
             if self._verbose:
                 print("General Stats:\n", A)
-                print(A[["Burned","Harvested"]].std())
+                print(A[["Burned","Firebreak"]].std())
 
             # General Summary
             SummaryDF = A.describe()
@@ -1095,7 +1095,7 @@ class Statistics(object):
                 WeightedScar += b[i]
             WeightedScar =  WeightedScar / len(b)
 
-            # Set harvested to null prob
+            # Set Firebreak to null prob
             WeightedScar[WeightedScar == 2] = 0
 
             if self._verbose:
@@ -1153,7 +1153,7 @@ class Statistics(object):
         ah = 0
         bh = {}
         statDicth = {}
-        statDFh = pd.DataFrame(columns=[["ID", "NonBurned", "Burned", "Harvested"]])
+        statDFh = pd.DataFrame(columns=[["ID", "NonBurned", "Burned", "Firebreak"]])
         for i in range(self._nSims):
             GridPath = os.path.join(self._OutFolder, "Grids", "Grids"+str(i+1))
             GridFiles = os.listdir(GridPath)
@@ -1164,7 +1164,7 @@ class Statistics(object):
                     statDicth[(i,j)] = {"ID": i+1,
                                        "NonBurned": len(ah[(ah == 0) | (ah == 2)]),
                                        "Burned": len(ah[ah == 1]),
-                                       "Harvested": len(ah[ah == -1]),
+                                       "Firebreak": len(ah[ah == -1]),
                                        "Hour": j+1}
             else:
                 if i != 0:
@@ -1173,7 +1173,7 @@ class Statistics(object):
                     statDicth[(i,j)] = {"ID": i+1,
                                         "NonBurned": len(ah[(ah == 0) | (ah == 2)]),
                                         "Burned": len(ah[ah == 1]),
-                                        "Harvested": len(ah[ah == -1]),
+                                        "Firebreak": len(ah[ah == -1]),
                                         "Hour": j+1}
                 else:
                     ah = np.zeros([self._Rows,self.Cols]).astype(np.int64)
@@ -1181,7 +1181,7 @@ class Statistics(object):
                     statDicth[(i,0)] = {"ID": i+1,
                                         "NonBurned": len(ah[(ah == 0) | (ah == 2)]),
                                         "Burned": len(ah[ah == 1]),
-                                        "Harvested": len(ah[ah == -1]),
+                                        "Firebreak": len(ah[ah == -1]),
                                         "Hour": 0 + 1}
 
         # Generate CSV files
@@ -1189,23 +1189,23 @@ class Statistics(object):
             # Dict to DataFrame
             Ah = pd.DataFrame(data=statDicth, dtype=np.int32)
             Ah = Ah.T
-            Ah[["Hour", "NonBurned", "Burned", "Harvested"]] = Ah[["Hour", "NonBurned", "Burned", "Harvested"]].astype(np.int32)
-            Ah = Ah[["ID", "Hour", "NonBurned", "Burned", "Harvested"]]
-            Aux = (Ah["NonBurned"] + Ah["Burned"] + Ah["Harvested"])
-            Ah["%NonBurned"], Ah["%Burned"], Ah["%Harvested"] = Ah["NonBurned"] / Aux, Ah["Burned"] / Aux, Ah["Harvested"] / Aux
+            Ah[["Hour", "NonBurned", "Burned", "Firebreak"]] = Ah[["Hour", "NonBurned", "Burned", "Firebreak"]].astype(np.int32)
+            Ah = Ah[["ID", "Hour", "NonBurned", "Burned", "Firebreak"]]
+            Aux = (Ah["NonBurned"] + Ah["Burned"] + Ah["Firebreak"])
+            Ah["%NonBurned"], Ah["%Burned"], Ah["%Firebreak"] = Ah["NonBurned"] / Aux, Ah["Burned"] / Aux, Ah["Firebreak"] / Aux
             Ah.to_csv(os.path.join(self._StatsFolder, "HourlyStats.csv"), columns=Ah.columns, index=False,
                       header=True, float_format='%.3f')
             if self._verbose:
                 print("Hourly Stats:\n",Ah)
 
             # Hourly Summary
-            SummaryDF = Ah[["NonBurned", "Burned", "Harvested", "Hour"]].groupby('Hour')["NonBurned", "Burned", "Harvested"].mean()
-            SummaryDF.rename(columns={"NonBurned":"AVGNonBurned", "Burned":"AVGBurned", "Harvested":"AVGHarvested"}, inplace=True)
-            SummaryDF[["STDBurned", "STDHarvested"]] = Ah[["NonBurned", "Burned", "Harvested", "Hour"]].groupby('Hour')["Burned","Harvested"].std()[["Burned","Harvested"]]
-            SummaryDF[["MaxNonBurned", "MaxBurned"]] = Ah[["NonBurned", "Burned", "Harvested", "Hour"]].groupby('Hour')["NonBurned", "Burned"].max()[["NonBurned", "Burned"]]
-            SummaryDF[["MinNonBurned", "MinBurned"]] = Ah[["NonBurned", "Burned", "Harvested", "Hour"]].groupby('Hour')["NonBurned", "Burned"].min()[["NonBurned", "Burned"]]
-            Aux = (SummaryDF["AVGNonBurned"] + SummaryDF["AVGBurned"] + SummaryDF["AVGHarvested"])
-            SummaryDF["%AVGNonBurned"], SummaryDF["%AVGBurned"], SummaryDF["%AVGHarvested"] = SummaryDF["AVGNonBurned"] / Aux, SummaryDF["AVGBurned"] / Aux, SummaryDF["AVGHarvested"] / Aux
+            SummaryDF = Ah[["NonBurned", "Burned", "Firebreak", "Hour"]].groupby('Hour')["NonBurned", "Burned", "Firebreak"].mean()
+            SummaryDF.rename(columns={"NonBurned":"AVGNonBurned", "Burned":"AVGBurned", "Firebreak":"AVGFirebreak"}, inplace=True)
+            SummaryDF[["STDBurned", "STDFirebreak"]] = Ah[["NonBurned", "Burned", "Firebreak", "Hour"]].groupby('Hour')["Burned","Firebreak"].std()[["Burned","Firebreak"]]
+            SummaryDF[["MaxNonBurned", "MaxBurned"]] = Ah[["NonBurned", "Burned", "Firebreak", "Hour"]].groupby('Hour')["NonBurned", "Burned"].max()[["NonBurned", "Burned"]]
+            SummaryDF[["MinNonBurned", "MinBurned"]] = Ah[["NonBurned", "Burned", "Firebreak", "Hour"]].groupby('Hour')["NonBurned", "Burned"].min()[["NonBurned", "Burned"]]
+            Aux = (SummaryDF["AVGNonBurned"] + SummaryDF["AVGBurned"] + SummaryDF["AVGFirebreak"])
+            SummaryDF["%AVGNonBurned"], SummaryDF["%AVGBurned"], SummaryDF["%AVGFirebreak"] = SummaryDF["AVGNonBurned"] / Aux, SummaryDF["AVGBurned"] / Aux, SummaryDF["AVGFirebreak"] / Aux
             SummaryDF.reset_index(inplace=True)
             SummaryDF.to_csv(os.path.join(self._StatsFolder, "HourlySummaryAVG.csv"), header=True,
                              index=False, columns=SummaryDF.columns, float_format='%.3f')
@@ -1218,8 +1218,8 @@ class Statistics(object):
                          Path=self._StatsFolder, namePlot="BurnedCells_BoxPlot", swarm=False)
             self.BoxPlot(Ah, yy="NonBurned", ylab="# NonBurned Cells", pal="Greens", title="NonBurned Cells evolution",
                          Path=self._StatsFolder, namePlot="NonBurnedCells_BoxPlot", swarm=False)
-            self.BoxPlot(Ah, yy="Harvested", ylab="# Harvested Cells", pal="Blues", title="Harvested Cells evolution",
-                         Path=self._StatsFolder, namePlot="HarvestedCells_BoxPlot", swarm=False)
+            self.BoxPlot(Ah, yy="Firebreak", ylab="# Firebreak Cells", pal="Blues", title="Firebreak Cells evolution",
+                         Path=self._StatsFolder, namePlot="FirebreakCells_BoxPlot", swarm=False)
 
 
         # Hourly histograms
