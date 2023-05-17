@@ -748,7 +748,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	int loops = 0;
 	int microloops = 0;
 	this->noIgnition = false;
-	std::default_random_engine generator2(args.seed * ep);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
+	std::default_random_engine generator2(args.seed * ep*this->nCells);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
 	std::unordered_map<int, CellsFBP>::iterator it;
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
 
