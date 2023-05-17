@@ -477,16 +477,16 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				FSCell->push_back(double(period));
 				FSCell->push_back(std::ceil(ros * 100.0) / 100.0);
 				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
-				crownState[this->realId]=mainstruct.cros;
-				crownState[nb]=metrics.cros;
-				RateOfSpreads[this->realId]=double(std::ceil(ros * 100.0) / 100.0);
-				RateOfSpreads[nb]=double(std::ceil(ros * 100.0) / 100.0);
-				Intensities[this->realId]=mainstruct.byram;
-				Intensities[nb]=metrics.byram;
-				crownFraction[this->realId]=mainstruct.cfb;
-				crownFraction[nb]=metrics.cfb;
-		    		FlameLengths[this->realId]=mainstruct.fl;
-			    	FlameLengths[nb]=metrics.fl;
+				crownState[this->realId-1]=mainstruct.cros;
+				crownState[nb-1]=metrics.cros;
+				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
+				RateOfSpreads[nb-1]=double(std::ceil(ros * 100.0) / 100.0);
+				Intensities[this->realId-1]=mainstruct.byram;
+				Intensities[nb-1]=metrics.byram;
+				crownFraction[this->realId-1]=mainstruct.cfb;
+				crownFraction[nb-1]=metrics.cfb;
+		    		FlameLengths[this->realId-1]=mainstruct.fl;
+			    	FlameLengths[nb-1]=metrics.fl;
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);
@@ -699,16 +699,16 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 				FSCell->push_back(double(period));
 				FSCell->push_back(ros);
 				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
-				crownState[this->realId]=mainstruct.cros;
-				crownState[nb]=metrics.cros;
-				RateOfSpreads[this->realId]=double(std::ceil(ros * 100.0) / 100.0);
-				RateOfSpreads[nb]=double(std::ceil(ros * 100.0) / 100.0);
-				Intensities[this->realId]=mainstruct.byram;
-				Intensities[nb]=metrics.byram;
-				crownFraction[this->realId]=mainstruct.cfb;
-				crownFraction[nb]=metrics.cfb;
-		    		FlameLengths[this->realId]=mainstruct.fl;
-			    	FlameLengths[nb]=metrics.fl;
+				crownState[this->realId-1]=mainstruct.cros;
+				crownState[nb-1]=metrics.cros;
+				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
+				RateOfSpreads[nb-1]=double(std::ceil(ros * 100.0) / 100.0);
+				Intensities[this->realId-1]=mainstruct.byram;
+				Intensities[nb-1]=metrics.byram;
+				crownFraction[this->realId-1]=mainstruct.cfb;
+				crownFraction[nb-1]=metrics.cfb;
+		    		FlameLengths[this->realId-1]=mainstruct.fl;
+			    	FlameLengths[nb-1]=metrics.fl;
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);
                 /*if (verbose) {
