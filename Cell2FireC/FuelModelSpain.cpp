@@ -2393,7 +2393,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 	
 	// Aux
 	float  ros, bros, lb, fros;
-	bool crownFire;
+	bool crownFire=false;
     
     // Populate fuel coefs struct
 	//ptr->fueltype = data->fueltype;
