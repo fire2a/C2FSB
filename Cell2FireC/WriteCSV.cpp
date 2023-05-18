@@ -12,11 +12,14 @@
 #include <boost/algorithm/string.hpp>
 #include <set>
 
+
+#if defined _WIN32 || defined __CYGWIN__
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <iostream>
 #include <Windows.h>
 #include <direct.h>
+#endif
+
 
  
 /*
@@ -280,6 +283,10 @@ void CSVWriter::MakeDir(std::string pathPlot) {
 	// Default folder simOuts
 	const char * Dir;
 	Dir = pathPlot.c_str();
-	int ret = _mkdir(Dir);
+	#if defined _WIN32 || defined __CYGWIN__
+		int ret = _mkdir(Dir);
+	#else
+		int ret = system(Dir);
+	#endif
 
 }
