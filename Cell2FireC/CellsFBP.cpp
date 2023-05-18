@@ -5,6 +5,7 @@
 #include "ReadCSV.h"
 #include "ReadArgs.h"
 #include "Ellipse.h"
+
 // Include libraries
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +22,6 @@
 //#define RAND_MAX 0.5
 
 using namespace std;
-
 
 
 /*

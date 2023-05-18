@@ -1,4 +1,4 @@
-﻿EIGENDIR     = /usr/include/eigen3/
+EIGENDIR     = /usr/include/eigen3/
 CC = g++
 MPCC = g++
 OPENMP = -fopenmp
@@ -29,4 +29,4 @@ Ellipse.o: Ellipse.cpp Ellipse.h
 FuelModelSpain.o: FuelModelSpain.cpp FuelModelSpain.h
 	$(CC) -c $(LIBS) $(CFLAGS) FuelModelSpain.cpp 
 clean:
-	rm Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o CellsFBP.o Cell2Fire SpottingFBP.o WriteCSV.o Ellipse.o FuelModelSpain.o *.gch
+	rm Lightning.o ReadArgs.o ReadCSV.o Cell2Fire.o CellsFBP.o Cell2Fire SpottingFBP.o Forest.o WriteCSV.o Ellipse.o FuelModelSpain.o *.gch

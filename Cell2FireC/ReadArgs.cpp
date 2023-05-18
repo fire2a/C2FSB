@@ -256,7 +256,7 @@ void parseArgs(int argc, char* argv[], arguments* args_ptr)
 		}
 		else args_ptr->FirePeriodLen =  args_ptr->MinutesPerWP;
     } 
-	else args_ptr->FirePeriodLen = dinput_PeriodLen;
+	else args_ptr->FirePeriodLen =  args_ptr->MinutesPerWP;
 	
 	//--IgnitionRad
 	char * input_igrad = getCmdOption(argv, argv + argc, "--IgnitionRad");
