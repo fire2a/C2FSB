@@ -29,14 +29,36 @@ std::vector<std::vector<std::string>> CSVReader::getData(){
 	std::ifstream file(this->fileName);
 	std::vector<std::vector<std::string> > dataList;
 	std::string line = "";
+// Iterate through each line and split the content using delimeter
+	if(this->fileName.substr(this->fileName.find_last_of(".") + 1) == "asc"){
+		int header=0;
+		while (getline(file, line)){
+			if (header<5){
+				std::vector<std::string> vec;
+				int start=0;
+				int end=0;
+				while((start=line.find_first_not_of(this->delimeter,end))!=std::string::npos){
+					end= line.find(this->delimeter,start);
+					vec.push_back(line.substr(start,end-start));
+				}
+				dataList.push_back(vec);
+				header++;
+			}
+			else{
+				std::vector<std::string> vec;
+				boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
+				dataList.push_back(vec);
+			}
 
-	// Iterate through each line and split the content using delimeter
-	while (getline(file, line))
-	{
+		}
+	}
 		std::vector<std::string> vec;
 		boost::algorithm::split(vec, line, boost::is_any_of(this->delimeter));
 		dataList.push_back(vec);
+		}
 	}
+	
+
 	// Close the File
 	file.close();
  
@@ -79,6 +101,7 @@ void CSVReader::parseDF(inputs * df_ptr, std::vector<std::vector<std::string>> &
 	
 	// Loop over cells (populating per row)
 	for (i=1; i <= NCells; i++){
+		//printf("Populating DF for cell %d\n", i);
 		faux = DF[i][0].append(" ").c_str();
 		
 		if (DF[i][3].compare("") == 0) elev = 0;

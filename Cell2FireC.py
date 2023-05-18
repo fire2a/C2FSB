@@ -74,7 +74,7 @@ class Cell2FireC:
                    '--ROS-Threshold', str(self.args.ROS_Threshold),
                    '--HFI-Threshold', str(self.args.HFI_Threshold),
                    '--bbo' if (self.args.BBO) else '',
-                   '--HarvestPlan', self.args.HCells if(self.args.HCells is not None) else '',
+                   '--FirebreakCells', self.args.HCells if(self.args.HCells is not None) else '',
                    '--cros' if (self.args.cros) else '',
                    '--ROS10Factor', str(self.args.ROS10Factor),
                    '--CCFFactor', str(self.args.CCFFactor),
@@ -141,7 +141,7 @@ class Cell2FireC:
                    '--ROS-Threshold', str(self.args.ROS_Threshold),
                    '--HFI-Threshold', str(self.args.HFI_Threshold),
                    '--bbo' if (self.args.BBO) else '',
-                   '--HarvestPlan', HarvestPlanFile if(HarvestPlanFile is not None) else '',
+                   '--FirebreakCells', HarvestPlanFile if(HarvestPlanFile is not None) else '',
                    '--cros' if (self.args.cros) else '',
                    '--HFactor', str(self.args.HFactor),
                    '--FFactor', str(self.args.FFactor),
@@ -167,7 +167,7 @@ class Cell2FireC:
 
         # End of the replications
         if HarvestPlanFile is not None:
-            print("End of Cell2FireC with Harvesting Plan execution...")
+            print("End of Cell2FireC with Firebreak Plan execution...")
         else:
             print("End of Cell2FireC execution...")
         if self.args.Geotiffs is not None:
@@ -483,7 +483,7 @@ class Cell2FireC:
     '''
     Initialize heuristic object to estimate FPV or other metrics
     '''
-    def heur(self, AvailCells=set(), BurntCells=set(), HarvestedCells=set()):
+    def heur(self, AvailCells=set(), BurntCells=set(), FirebreakCells=set()):
         # Seed
         npr.seed(self.args.seed)
 
@@ -524,7 +524,7 @@ class Cell2FireC:
                                      OutFolder=OutFolder,               # Output Folder path (for heuristic outputs)
                                      AvailCells=self._AvailCells,       # AvailCells
                                      BurntCells=BurntCells,             # BurntCells
-                                     HarvestedCells=HarvestedCells,     # Harvested Cells
+                                     FirebreakCells=FirebreakCells,     # Harvested Cells
                                      AdjCells=self._AdjCells,           # Adjacent cells info
                                      NCells=self._NCells,               # Number of cells inside the forest
                                      Cols=self._Cols,                   # Number of columns inside the forest

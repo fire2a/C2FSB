@@ -23,6 +23,8 @@ __maintainer__ = "Jaime Carrasco, Cristobal Pais, David Woodruff"
 #include <math.h>
 #include <cmath>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
@@ -74,7 +76,7 @@ void printSets(std::unordered_set<int> availCells, std::unordered_set<int> nonBu
 	std::cout << std::endl;
 	
 	
-	std::cout << "Harvested Cells:";
+	std::cout << "Firebreak Cells:";
 	for (auto & hc : harvestCells){
 			std::cout << " " << hc;
 	}
@@ -150,6 +152,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	//DEBUGstd::cout << "------------------Detailed Data ----------------------\n" << std::endl;
 	this->rows = frdf.rows;
 	this->cols = frdf.cols;
+	this->widthSims=std::to_string(this->args.TotalSims).length();
 	this->nCells = rows * cols; 
 	this->cellSide = frdf.cellside;
 	this->areaCells= cellSide * cellSide;
@@ -159,7 +162,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 
 	this->coordCells = frdf.coordCells;
 	this->adjCells = frdf.adjCells;
-		
+	
 	/********************************************************************
 							Dataframes initialization: Forest and Weather
 	********************************************************************/
@@ -178,6 +181,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	
 	// Create empty df with size of NCells
 	df_ptr = & df[0];
+
 	// Populate the df [nCells] objects
 	CSVParser.parseDF(df_ptr, DF,this->args_ptr, this->nCells);
 
@@ -225,7 +229,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 		CSVHPlan.parseHarvestedDF(HarvestedCells, HarvestedDF, HCellsP);
 		
 		// Print-out
-		std::cout << "\nTo Harvest Cells :" << std::endl;
+		std::cout << "\nFirebreak Cells :" << std::endl;
 		for (auto it = HarvestedCells.begin(); it != HarvestedCells.end(); it++ ){
 			std::cout << " " << it->first << ": ";
 				for (auto & it2 : it->second){
@@ -494,6 +498,7 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 		this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator();
 		CSVFolder.MakeDir(this->gridFolder);
 		//this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim);
+		//TODO sim left padded zeros (total sim width)
 		this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
 		CSVFolder.MakeDir(this->gridFolder);
 		//DEBUGstd::cout << "\nInitial Grid folder was generated in " << this->gridFolder << std::endl;
@@ -756,7 +761,7 @@ bool Cell2Fire::RunIgnition(std::default_random_engine generator, int ep){
 	int loops = 0;
 	int microloops = 0;
 	this->noIgnition = false;
-	std::default_random_engine generator2(args.seed * ep);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
+	std::default_random_engine generator2(args.seed * ep*this->nCells);// * time(NULL)); //creates a different generator solving cases when parallel running creates simulations at same time
 	std::unordered_map<int, CellsFBP>::iterator it;
 	std::uniform_int_distribution<int> distribution(1, this->nCells);
 
@@ -1093,29 +1098,24 @@ void Cell2Fire::GetMessages(std::unordered_map<int, std::vector<int>> sendMessag
 
 	// Messages and repetition
 	if (this->repeatFire && this->messagesSent) {
-
 		if (this->args.verbose) std::cout << "Messages have been sent, next step. Current period: " << this->fire_period[this->year - 1] << std::endl;
 		this->repeatFire = false;
 	}
 	
 	// No messages, no repeat (break and next year)
 	if (!this->messagesSent && !this->repeatFire) {
-
 		if (this->args.verbose){
 			std::cout << "\nNo messages during the fire period, end of year "<< this->year << std::endl;
 		}
-
 		// Next year, reset weeks, weather period, and update burnt cells from burning cells
 		this->year += 1;
 		this->weatherPeriod = 0;
 		this->noMessages = true;
-
 		// Update sets
 		for(auto &bc : this->burningCells){
 			this->burntCells.insert(bc);
 		}
 		this->burningCells.clear();
-
 		if (this->args.verbose) printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
 	}
 
@@ -1295,13 +1295,13 @@ void Cell2Fire::Results(){
 	std::cout << "Total Available Cells:    " << ACells << " - % of the Forest: " <<  ACells/nCells*100.0 << "%" << std::endl;
 	std::cout << "Total Burnt Cells:        " << BCells << " - % of the Forest: " <<  BCells/nCells*100.0 <<"%" << std::endl;
 	std::cout << "Total Non-Burnable Cells: " << NBCells << " - % of the Forest: " <<  NBCells/nCells*100.0 <<"%"<< std::endl;
-	std::cout << "Total Harvested Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
+	std::cout << "Total Firebreak Cells: " << HCells << " - % of the Forest: " <<  HCells/nCells*100.0 <<"%"<< std::endl;
 
 	// Final Grid 
 	if(this->args.FinalGrid){
 		CSVWriter CSVFolder("","");
 		if (this->args.OutFolder.empty())
-			this->gridFolder = this->args.InFolder + "simOuts" + separator() + "Grids/Grids" + std::to_string(this->sim);
+			this->gridFolder = this->args.InFolder + "simOuts" + separator() + "Grids" + separator() +"Grids" + std::to_string(this->sim);
 		else
 			this->gridFolder = this->args.OutFolder + separator() + "Grids" + separator() + "Grids" + std::to_string(this->sim);
 		CSVFolder.MakeDir(this->gridFolder);
@@ -1319,20 +1319,15 @@ void Cell2Fire::Results(){
 	if(this->args.OutMessages){
 		this->messagesFolder = this->args.OutFolder +separator()+ "Messages"+separator();
 		std::string messagesName;
-		
-		if (this->sim < 10){
-			messagesName = this->messagesFolder + "MessagesFile0" + std::to_string(this->sim) + ".csv";
-		}
-		
-		else{
-			messagesName = this->messagesFolder + "MessagesFile" + std::to_string(this->sim) + ".csv";
-		}
-		
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		messagesName= this->messagesFolder+"MessagesFile"+oss.str()+".csv";
 		if(this->args.verbose){
 			std::cout  << "We are generating the network messages to a csv file " << messagesName << std::endl;
 		}
 		CSVWriter CSVPloter(messagesName, ",");
-
+		//CSVPloter.printCSVDouble_V2(this->FSCell.size() - this->nIgnitions, 4, this->FSCell);
 		CSVPloter.printCSVDouble_V2(this->FSCell.size()/4, 4, this->FSCell);
 	}
 
@@ -1341,16 +1336,12 @@ void Cell2Fire::Results(){
 	if (this->args.OutRos) {
 		this->rosFolder = this->args.OutFolder +separator() + "RateOfSpread" + separator();
 		std::string rosName;
-		if (this->sim < 10) {
-			rosName = this->rosFolder + "ROSFile0" + std::to_string(this->sim) + ".asc";
-		}
-
-		else {
-			rosName = this->rosFolder + "ROSFile" + std::to_string(this->sim) + ".asc";
-		}
-
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		rosName= this->rosFolder+"ROSFile"+oss.str()+".asc";
 		if (this->args.verbose) {
-			std::cout << "We are generating the Hitting ROS to a asc file " << rosName << std::endl;
+			std::cout << "We are generating the Rate of Spread to a asc file " << rosName << std::endl;
 		}
 		CSVWriter CSVPloter(rosName, " ");
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->RateOfSpreads);
@@ -1358,82 +1349,65 @@ void Cell2Fire::Results(){
 
 	// Intensity
 	if (this->args.OutIntensity) {
-		this->rosFolder = this->args.OutFolder + separator() +  "Intensity" + separator();
-		std::string rosName;
-		if (this->sim < 10) {
-			rosName = this->rosFolder + "Intensity0" + std::to_string(this->sim) + ".asc";
-		}
-
-		else {
-			rosName = this->rosFolder + "Intensity" + std::to_string(this->sim) + ".asc";
-		}
+		this->intensityFolder = this->args.OutFolder + "/Intensity/";
+		std::string intensityName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		intensityName= this->intensityFolder+"Intensity"+oss.str()+".asc";
 
 		if (this->args.verbose) {
-			std::cout << "We are generating the Byram Intensity to a asc file " << rosName << std::endl;
+			std::cout << "We are generating the Byram Intensity to a asc file " << intensityName << std::endl;
 		}
-		CSVWriter CSVPloter(rosName, " ");
+		CSVWriter CSVPloter(intensityName, " ");
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->Intensities);
 	}
 
-
 	if (this->args.OutFl) {
-		this->rosFolder = this->args.OutFolder + separator() +"FlameLength"+separator();
-		std::string rosName;
-		if (this->sim < 10) {
-			rosName = this->rosFolder + "FL0" + std::to_string(this->sim) + ".asc";
-		}
-
-		else {
-			rosName = this->rosFolder + "FL" + std::to_string(this->sim) + ".asc";
-		}
-
+		this->flFolder = this->args.OutFolder + "/FlameLength/";
+		std::string flName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		flName= this->flFolder+"FL"+oss.str()+".asc";
 		if (this->args.verbose) {
-			std::cout << "We are generating the Flame Lenght to a asc file " << rosName << std::endl;
+			std::cout << "We are generating the Flame Lenght to a asc file " << flName << std::endl;
 		}
-		CSVWriter CSVPloter(rosName, " ");
+		CSVWriter CSVPloter(flName, " ");
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->FlameLengths);
 	}
 
 	
 		// Intensity
 	if ((this->args.OutCrownConsumption) && (this->args.AllowCROS)) {
-		this->rosFolder = this->args.OutFolder + separator() + "CrownFractionBurn"+separator();
-		std::string rosName;
-		if (this->sim < 10) {
-			rosName = this->rosFolder + "Cfb0" + std::to_string(this->sim) + ".asc";
-		}
-
-		else {
-			rosName = this->rosFolder + "Cfb" + std::to_string(this->sim) + ".asc";
-		}
-
+		this->cfbFolder = this->args.OutFolder + "/CrownFractionBurn/";
+		std::string cfbName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		cfbName= this->cfbFolder+"Cfb"+oss.str()+".asc";
 		if (this->args.verbose) {
-			std::cout << "We are generating the Crown Fraction Burn to a asc file " << rosName << std::endl;
+			std::cout << "We are generating the Crown Fraction Burn to a asc file " << cfbName << std::endl;
 		}
-		CSVWriter CSVPloter(rosName, " ");
+		CSVWriter CSVPloter(cfbName, " ");
 		CSVPloter.printASCII(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownFraction);
 	}
 
-
 	// Crown
 	if ((this->args.OutCrown) && (this->args.AllowCROS)) {
-		this->rosFolder = this->args.OutFolder + separator() + "CrownFire" + separator();
-		std::string rosName;
-		if (this->sim < 10) {
-			rosName = this->rosFolder + "Crown0" + std::to_string(this->sim) + ".asc";
-		}
-		else {
-			rosName = this->rosFolder + "Crown" + std::to_string(this->sim) + ".asc";
-		}
+		this->crownFolder = this->args.OutFolder + "/CrownFire/";
+		std::string crownName;
+		std::ostringstream oss;
+		oss.str("");
+		oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+		crownName= this->crownFolder+"Crown"+oss.str()+".asc";
 		if (this->args.verbose) {
-			std::cout << "We are generating the Crown behavior to a asc file " << rosName << std::endl;
+			std::cout << "We are generating the Crown behavior to a asc file " << crownName << std::endl;
 		}
-		CSVWriter CSVPloter(rosName, " ");
+		CSVWriter CSVPloter(crownName, " ");
 		//CSVPloter.printCrownAscii(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownMetrics, statusCells2); /OLD VERSION
 		CSVPloter.printASCIIInt(this->rows, this->cols, this->xllcorner, this->yllcorner, this->cellSide, this->crownState);
-
 	}	
-	
 }
 
 
@@ -1453,15 +1427,10 @@ void Cell2Fire::outputGrid(){
 	for (auto & hc : this->harvestCells){
 			statusCells2[hc-1] = -1;
 	}
-		
-	if (this->gridNumber < 10){
-			gridName = this->gridFolder+ "ForestGrid0" + std::to_string(this->gridNumber) + ".csv";
-	}
-	
-	else {
-			gridName = this->gridFolder+ "ForestGrid" + std::to_string(this->gridNumber) + ".csv";
-	}
-	
+	std::ostringstream oss;
+	oss.str("");
+	oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+	gridName= this->gridFolder+"ForestGrid"+oss.str()+".csv";
 	if(this->args.verbose){
 		std::cout  << "We are plotting the current forest to a csv file " << gridName << std::endl;
 	}
@@ -1507,7 +1476,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		printSets(this->availCells, this->nonBurnableCells, this->burningCells, this->burntCells, this->harvestCells);
 		std::cout << "********************************************" << std::endl;
 	}
-
 	 // One step (one fire period, ignition - if needed -, sending messages and receiving them - if needed)
 	 // For completeness: just in case user runs it longer than the horizon (should not happen)
 	if (this->year > this->args.TotalYears){
@@ -1515,7 +1483,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 			printf("\nYear is greater than the Horizon, no more steps");
 		}
 		this->done = true;
-
 		// Print-out results to folder
 		if (this->args.verbose) this->Results();        
 		
@@ -1530,21 +1497,17 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	
 	// New operational step (ONE fire period)
 	if (this->fire_period[this->year - 1] > 0 && !this->done){
-
 		// Fire Spread (one time step of RL - Operational)
 		// Send messages after ignition (does not advance time!)
 		std::unordered_map<int, std::vector<int>> SendMessageList = this->SendMessages();
-
 		// Get Message
 		this->GetMessages(SendMessageList);
-
 	}
 	
 	// Operational dynamic
 	// Ignition if we are in the first period (added workaround for no Messages)
 	if (!this->done && !this->noMessages){
 		if (this->fire_period[this->year - 1] == 0) {
-
 			//std::cout << "Entra a Ignition step 0" << std::endl;
 			// Continue only if ignition  - No ignition (True): done
 			if (this->RunIgnition(generator, ep)) {
@@ -1586,7 +1549,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	//}
 	
 	if (this->fire_period[std::min(this->year , int(fire_period.size())) - 1] >= this->args.MaxFirePeriods){
-
 		// Extra breaking condition: Max fire periods then go to next year
 		if (this->args.verbose){
 			printf("\nNext year due to max periods...\n");
@@ -1609,7 +1571,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	
 	// If more than planning horizon, next sim
 	if (this->year > this->args.TotalYears){
-
 		//printf("\n\nEntra a year mayor al total...\n\n");
 		// Print-out results to folder
 		this->Results();
@@ -1622,7 +1583,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	// Done flag (extra condition: no available cells or death of the team)
 	if ((this->availCells.size() == 0) || (this->burningCells.size() == 0 && !this->noMessages) && !this->done && !auxC){
 		// Done
-
 		this->done = true;
 		
 		// Print-out results to folder
@@ -1633,7 +1593,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 	}
 
 	if ((this->sim > args.TotalSims) && (args.WeatherOpt != "rows")) {
-
 		this->counter_wt += 1;
 		if (this->counter_wt <= 1) {
 			// Weather History Folder
@@ -1649,7 +1608,6 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 		
 	// Print current status
 	if (!this->done && this->args.verbose){
-
 		printf("\nFire Period: %d", this->fire_period[this->year - 1]);
 		printf("\nYear: %d \n\n", this->year);
 	}
