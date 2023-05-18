@@ -1429,7 +1429,7 @@ void Cell2Fire::outputGrid(){
 	}
 	std::ostringstream oss;
 	oss.str("");
-	oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->sim;
+	oss<<std::setfill('0')<<std::setw(this->widthSims)<<this->gridNumber;
 	gridName= this->gridFolder+"ForestGrid"+oss.str()+".csv";
 	if(this->args.verbose){
 		std::cout  << "We are plotting the current forest to a csv file " << gridName << std::endl;
