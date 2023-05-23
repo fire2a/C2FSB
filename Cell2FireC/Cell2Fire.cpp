@@ -1319,7 +1319,7 @@ void Cell2Fire::Results(){
 	
 	// Messages
 	if(this->args.OutMessages){
-		this->messagesFolder = this->args.OutFolder +separator()+ "Messages"+separator();
+		this->messagesFolder = this->args.OutFolder +"Messages"+separator();
 		std::string messagesName;
 		std::ostringstream oss;
 		oss.str("");
@@ -1336,7 +1336,7 @@ void Cell2Fire::Results(){
 
 	// RateOfSpread
 	if (this->args.OutRos) {
-		this->rosFolder = this->args.OutFolder +separator() + "RateOfSpread" + separator();
+		this->rosFolder = this->args.OutFolder + "RateOfSpread" + separator();
 		std::string rosName;
 		std::ostringstream oss;
 		oss.str("");
@@ -1351,7 +1351,7 @@ void Cell2Fire::Results(){
 
 	// Intensity
 	if (this->args.OutIntensity) {
-		this->intensityFolder = this->args.OutFolder + "/Intensity/";
+		this->intensityFolder = this->args.OutFolder + "Intensity"+separator();
 		std::string intensityName;
 		std::ostringstream oss;
 		oss.str("");
@@ -1366,7 +1366,7 @@ void Cell2Fire::Results(){
 	}
 
 	if (this->args.OutFl) {
-		this->flFolder = this->args.OutFolder + "/FlameLength/";
+		this->flFolder = this->args.OutFolder + "FlameLength"+separator();
 		std::string flName;
 		std::ostringstream oss;
 		oss.str("");
@@ -1382,7 +1382,7 @@ void Cell2Fire::Results(){
 	
 		// Intensity
 	if ((this->args.OutCrownConsumption) && (this->args.AllowCROS)) {
-		this->cfbFolder = this->args.OutFolder + "/CrownFractionBurn/";
+		this->cfbFolder = this->args.OutFolder + "CrownFractionBurn"+separator();
 		std::string cfbName;
 		std::ostringstream oss;
 		oss.str("");
@@ -1397,7 +1397,7 @@ void Cell2Fire::Results(){
 
 	// Crown
 	if ((this->args.OutCrown) && (this->args.AllowCROS)) {
-		this->crownFolder = this->args.OutFolder + "/CrownFire/";
+		this->crownFolder = this->args.OutFolder + "CrownFire"+separator();
 		std::string crownName;
 		std::ostringstream oss;
 		oss.str("");
