@@ -10,7 +10,7 @@ C2F+S&B is a version of the fire spread simulator [Cell2Fire](https://github.com
 
 Unlike Cell2Fire, the fire spread is governed by spread rates predicted by the Scott and Burgan fuel system, and uses its weathers scenarios to take into account the moisture of fine and dead particles. 
 
-Work in progress documentation is available at [readthedocs](https://cell2fire.readthedocs.io/en/latest/) and there is an original draft of a paper on [frontiers](https://www.frontiersin.org/).
+Work in progress documentation is available at [readthedocs](https://cell2fire.readthedocs.io/en/latest/) and there is an original draft of a paper on [frontiers](https://www.frontiersin.org/](https://www.frontiersin.org/articles/10.3389/ffgc.2023.1071484/full).
 
 # Installation
 Installation may require some familiarity with C++, make, and Python.
