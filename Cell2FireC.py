@@ -9,6 +9,7 @@ import shutil
 import signal
 import subprocess
 import sys
+from platform import system as platform_system
 import Cell2Fire.DataGeneratorC as DataGenerator
 import Cell2Fire.ReadDataPrometheus as ReadDataPrometheus
 from Cell2Fire.ParseInputs import InitCells
@@ -51,7 +52,8 @@ class Cell2FireC:
     # Run C++ Sim
     def run(self):
         # Parse args for calling C++ via subprocess
-        execArray=[os.path.join(os.getcwd(),'Cell2FireC/Cell2Fire'),
+        exe = '.exe' if platform_system() == 'Windows' else ''
+        execArray=[os.path.join(os.getcwd(),'Cell2FireC/Cell2Fire'+exe),
                    '--input-instance-folder', self.args.InFolder,
                    '--output-folder', self.args.OutFolder if (self.args.OutFolder is not None) else '',
                    '--ignitions' if (self.args.ignitions) else '',
@@ -118,7 +120,8 @@ class Cell2FireC:
     # Run C++ Sim with heuristic treatment
     def run_Heur(self, OutFolder, HarvestPlanFile):
         # Parse args for calling C++ via subprocess
-        execArray=[os.path.join(os.getcwd(),'Cell2FireC/Cell2Fire'),
+        exe = '.exe' if platform_system() == 'Windows' else ''
+        execArray=[os.path.join(os.getcwd(),'Cell2FireC/Cell2Fire'+exe),
                    '--input-instance-folder', self.args.InFolder,
                    '--output-folder', OutFolder if (OutFolder is not None) else '',
                    '--ignitions' if (self.args.ignitions) else '',
@@ -167,7 +170,7 @@ class Cell2FireC:
 
         # End of the replications
         if HarvestPlanFile is not None:
-            print("End of Cell2FireC with Firebreak Plan execution...")
+            print("End of Cell2FireC with Harvesting Plan execution...")
         else:
             print("End of Cell2FireC execution...")
         if self.args.Geotiffs is not None:
