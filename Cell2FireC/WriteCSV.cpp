@@ -282,10 +282,13 @@ void CSVWriter::printCSV_V2(int rows, int cols, std::vector<int> statusCells)
 void CSVWriter::MakeDir(std::string pathPlot) {
 	// Default folder simOuts
 	const char * Dir;
-	Dir = pathPlot.c_str();
 	#if defined _WIN32 || defined __CYGWIN__
+		Dir = pathPlot.c_str();
 		int ret = _mkdir(Dir);
 	#else
+		std::string inst="mkdir -p ";
+		pathPlot=inst+pathPlot;
+		Dir = pathPlot.c_str();
 		int ret = system(Dir);
 	#endif
 

@@ -492,30 +492,20 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	this->done = false;
 	this->fire_period = vector<int>(this->args.TotalYears, 0);
 	this->sim = simExt;
-	int os_sys=(separator()=='/') ? 1 : 0;  //linux=1, win=0
 	// Initial status grid folder
 	if(this->args.OutputGrids || this->args.FinalGrid){
 		CSVWriter CSVFolder("","");
-		if(os_sys==1){
-			this->gridFolder = "mkdir -p " + this->args.OutFolder + "Grids" + separator();
-			CSVFolder.MakeDir(this->gridFolder);
-			this->gridFolder = "mkdir -p " + this->args.OutFolder + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
-			CSVFolder.MakeDir(this->gridFolder);
-		}
-		else{
-			this->gridFolder = this->args.OutFolder + "Grids" + separator();
-			CSVFolder.MakeDir(this->gridFolder);
-			this->gridFolder = this->args.OutFolder + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
-			CSVFolder.MakeDir(this->gridFolder);
-		}
+		this->gridFolder = this->args.OutFolder + "Grids" + separator();
+		CSVFolder.MakeDir(this->gridFolder);
 		this->gridFolder = this->args.OutFolder + "Grids" + separator() + "Grids" + std::to_string(this->sim) + separator();
+		CSVFolder.MakeDir(this->gridFolder);
 		//DEBUGstd::cout << "\nInitial Grid folder was generated in " << this->gridFolder << std::endl;
 	}
 	
 	// Messages Folder
 	if(this->args.OutMessages){
 		CSVWriter CSVFolder("","");
-		this->messagesFolder = (os_sys==0)? this->args.OutFolder + "Messages": "mkdir -p "+this->args.OutFolder + "Messages" ;
+		this->messagesFolder = this->args.OutFolder + "Messages";
 		CSVFolder.MakeDir(this->messagesFolder);
 		this->messagesFolder = this->args.OutFolder + "Messages" + separator();
 
@@ -523,35 +513,35 @@ void Cell2Fire::reset(int rnumber, double rnumber2, int simExt = 1){
 	//ROS Folder
 	if (this->args.OutRos) {
 		CSVWriter CSVFolder("", "");
-		this->rosFolder = (os_sys==0)? this->args.OutFolder + "RateOfSpread": "mkdir -p "+this->args.OutFolder + "RateOfSpread" ;
+		this->rosFolder = this->args.OutFolder + "RateOfSpread" ;
 		CSVFolder.MakeDir(this->rosFolder);
 		this->rosFolder = this->args.OutFolder + "RateOfSpread"+separator();
 	}
 	//Byram Intensity Folder
 	if (this->args.OutIntensity) {
 		CSVWriter CSVFolder("", "");
-		this->intensityFolder = (os_sys==0)? this->args.OutFolder + "Intensity": "mkdir -p "+this->args.OutFolder + "Intensity" ;
+		this->intensityFolder = this->args.OutFolder + "Intensity" ;
 		CSVFolder.MakeDir(this->intensityFolder);
 		this->intensityFolder = this->args.OutFolder + "Intensity" + separator();
 	}
 	//Flame Length Folder
 	if (this->args.OutFl) {
 		CSVWriter CSVFolder("", "");
-		this->flFolder = (os_sys==0)? this->args.OutFolder + "FlameLength": "mkdir -p "+this->args.OutFolder + "FlameLength" ;
+		this->flFolder = this->args.OutFolder + "FlameLength" ;
 		CSVFolder.MakeDir(this->flFolder);
 		this->flFolder = this->args.OutFolder + "FlameLength"+separator();
 	}
 	//Crown Folder
 	if (this->args.OutCrown && this->args.AllowCROS) {
 		CSVWriter CSVFolder("", "");
-		this->crownFolder = (os_sys==0)? this->args.OutFolder + "CrownFire": "mkdir -p "+this->args.OutFolder + "CrownFire" ;
+		this->crownFolder = this->args.OutFolder + "CrownFire" ;
 		CSVFolder.MakeDir(this->crownFolder);
 		this->crownFolder = this->args.OutFolder + "CrownFire" + separator();
 	}
 		//Crown Fraction Burn Folder
 	if (this->args.OutCrownConsumption && this->args.AllowCROS) {
 		CSVWriter CSVFolder("", "");
-		this->cfbFolder = (os_sys==0)? this->args.OutFolder + "CrownFractionBurn": "mkdir -p "+this->args.OutFolder + "CrownFractionBurn" ;
+		this->cfbFolder = this->args.OutFolder + "CrownFractionBurn" ;
 		CSVFolder.MakeDir(this->cfbFolder);
 		this->cfbFolder = this->args.OutFolder + separator() +"CrownFractionBurn" + separator();
 	}
@@ -1600,10 +1590,8 @@ void Cell2Fire::Step(std::default_random_engine generator, int ep){
 			// Weather History Folder
 			std::string filename = "WeatherHistory.csv";
 			CSVWriter WtHistoryFolder("", "");
-			int os_sys=(separator()=='/') ? 1 : 0;  //linux=1, win=0
-			this->historyFolder = (os_sys==0)? this->args.OutFolder + "WeatherHistory"+separator(): "mkdir -p " + this->args.OutFolder + "WeatherHistory"+separator() ;
+			this->historyFolder = this->args.OutFolder + "WeatherHistory"+separator() ;
 			WtHistoryFolder.MakeDir(this->historyFolder);
-			this->historyFolder = this->args.OutFolder + "WeatherHistory"+separator();
 			CSVWriter WtFile(this->historyFolder + filename);
 			WtFile.printWeather(WeatherHistory);
 		}
