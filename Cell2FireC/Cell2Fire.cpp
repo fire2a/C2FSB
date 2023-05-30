@@ -39,7 +39,7 @@ using namespace std;
 inputs * df_ptr;
 weatherDF * wdf_ptr;
 weatherDF wdf[1000000];
-inputs df [9000000];
+inputs *df;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
@@ -178,7 +178,8 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	std::cout << "Forest DataFrame from instance " << filename << std::endl;
 	//DEBUGCSVParser.printData(DF);
 	std::cout << "Number of cells: " <<  this->nCells  << std::endl;
-	
+	df = new inputs[this->nCells];
+
 	// Create empty df with size of NCells
 	df_ptr = & df[0]; //access reference for the first element of df
 
@@ -1672,6 +1673,7 @@ int main(int argc, char* argv[]) {
 	int num_threads = args.nthreads;
 	int TID = 0;
 
+	
 	Cell2Fire Forest2(args); //generate Forest object
 	std::vector<Cell2Fire> Forests(num_threads, Forest2);
 
@@ -1745,6 +1747,7 @@ int main(int argc, char* argv[]) {
 
 		}
 	}
+	delete [] df;
 	return 0;
 }
 
