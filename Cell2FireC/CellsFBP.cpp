@@ -476,6 +476,11 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				FSCell->push_back(double(nb));
 				FSCell->push_back(double(period));
 				FSCell->push_back(std::ceil(ros * 100.0) / 100.0);
+				df_ptr[nb-1].waz = wdf_ptr->waz;
+				df_ptr[nb-1].ws = wdf_ptr->ws;
+				df_ptr[nb-1].scen = args->scenario;
+				df_ptr[nb-1].cros = args->AllowCROS;
+				df_ptr[nb-1].verbose = args->verbose;
 				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
 				crownState[this->realId-1]=mainstruct.cros;
 				crownState[nb-1]=metrics.cros;
@@ -485,8 +490,8 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				Intensities[nb-1]=metrics.byram;
 				crownFraction[this->realId-1]=mainstruct.cfb;
 				crownFraction[nb-1]=metrics.cfb;
-		    		FlameLengths[this->realId-1]=mainstruct.fl;
-			    	FlameLengths[nb-1]=metrics.fl;
+		    	FlameLengths[this->realId-1]=mainstruct.fl;
+			    FlameLengths[nb-1]=metrics.fl;
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);
