@@ -38,8 +38,8 @@ using namespace std;
 // Global Variables (DFs with cells and weather info)
 inputs * df_ptr;
 weatherDF * wdf_ptr;
-weatherDF wdf[100000] //hard to dynamic allocate memory since it changes from file to file, better to keep constant size;
-inputs *df;
+weatherDF wdf[100000]; //hard to dynamic allocate memory since it changes from file to file, better to keep constant size;
+inputs * df;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;

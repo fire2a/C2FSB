@@ -320,13 +320,10 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 	// Populate Inputs 
 	df_ptr[this->realId-1].waz = wdf_ptr->waz;
 	df_ptr[this->realId-1].ws = wdf_ptr->ws;
-	df_ptr[this->realId-1].scen = args->scenario;
 	df_ptr[this->realId-1].factor_cbd = args->CBDFactor;   
 	df_ptr[this->realId-1].factor_ccf = args->CCFFactor;
 	df_ptr[this->realId-1].factor_ros10 = args->ROS10Factor;
 	df_ptr[this->realId-1].factor_actv = args->CROSActThreshold;
-	df_ptr[this->realId-1].cros = args->AllowCROS;
-	df_ptr[this->realId-1].verbose = args->verbose;
 
 	// Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct, metrics;
@@ -334,7 +331,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
     fire_struc headstruct, backstruct, flankstruct;
 
 	// Calculate parameters
-	calculate(&df_ptr[this->realId-1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+	calculate(&df_ptr[this->realId-1], coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 	
 	/*  ROSs DEBUG!   */
 	if(args->verbose){
@@ -351,8 +348,6 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 		std::cout <<  "cbd: " << df_ptr[this->realId-1].cbd << std::endl;
 		std::cout <<  "cbh: " << df_ptr[this->realId-1].cbh << std::endl;
 		std::cout <<  "ccf: " << df_ptr[this->realId-1].ccf << std::endl;
-		std::cout <<  "scen: " << df_ptr[this->realId-1].scen << std::endl;
-		std::cout <<  "cros: " << df_ptr[this->realId-1].cros << std::endl;
 		std::cout <<  "\n-------Mainout Structure--------" << std::endl;
 		std::cout << "rss: " << mainstruct.rss << std::endl;
 		std::cout << "angle: " << mainstruct.angle << std::endl;
@@ -478,10 +473,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				FSCell->push_back(std::ceil(ros * 100.0) / 100.0);
 				df_ptr[nb-1].waz = wdf_ptr->waz;
 				df_ptr[nb-1].ws = wdf_ptr->ws;
-				df_ptr[nb-1].scen = args->scenario;
-				df_ptr[nb-1].cros = args->AllowCROS;
-				df_ptr[nb-1].verbose = args->verbose;
-				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
+				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef,args, &metrics);
 				crownState[this->realId-1]=mainstruct.cros;
 				crownState[nb-1]=metrics.cros;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
@@ -569,15 +561,13 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 	// Populate inputs 
 	df_ptr->waz = wdf_ptr->waz;
 	df_ptr->ws = wdf_ptr->ws;
-	df_ptr->scen = args->scenario;
 	df_ptr->factor_cbd = args->CBDFactor;   
 	df_ptr->factor_ccf = args->CCFFactor;
 	df_ptr->factor_ros10 = args->ROS10Factor;
 	df_ptr->factor_actv = args->CROSActThreshold;
-	df_ptr->cros = args->AllowCROS;
 	
 	// Calculate parameters
-	calculate(df_ptr, coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+	calculate(df_ptr, coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 	
 	/*  ROSs DEBUG!   */
 	if(args->verbose){
@@ -703,7 +693,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 				FSCell->push_back(double(nb));
 				FSCell->push_back(double(period));
 				FSCell->push_back(ros);
-				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
+				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef,args, &metrics);
 				crownState[this->realId-1]=mainstruct.cros;
 				crownState[nb-1]=metrics.cros;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
@@ -792,15 +782,13 @@ bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_c
 	// Compute main angle and ROSs: forward, flanks and back
 	df[this->id].waz = wdf_ptr->waz;
 	df[this->id].ws = wdf_ptr->ws;
-	df[this->id].scen = args->scenario;
 	df[this->id].factor_cbd = args->CBDFactor;   
 	df[this->id].factor_ccf = args->CCFFactor;
 	df[this->id].factor_ros10 = args->ROS10Factor;
 	df[this->id].factor_actv = args->CROSActThreshold;
-	df[this->id].cros = args->AllowCROS;
 	
 	// Calculate
-	calculate(&(df[this->id]), coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+	calculate(&(df[this->id]), coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 
     if (args->verbose) { 
 		std::cout << "\nMain Angle :" << wdf_ptr->waz << std::endl;
@@ -893,14 +881,12 @@ bool CellsFBP::ignition(int period, int year, std::vector<int> & ignitionPoints,
 		// Populate inputs 
 		df_ptr->waz = wdf_ptr->waz;
 		df_ptr->ws = wdf_ptr->ws;
-		df_ptr->scen = args->scenario;
 		df_ptr->factor_cbd = args->CBDFactor;   
 		df_ptr->factor_ccf = args->CCFFactor;
 		df_ptr->factor_ros10 = args->ROS10Factor;
 		df_ptr->factor_actv = args->CROSActThreshold;
-		df_ptr->cros = args->AllowCROS;
 			
-        calculate(df_ptr, coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+        calculate(df_ptr, coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 
         if (args->verbose) {
 			std::cout << "\nIn ignition function" << std::endl;
