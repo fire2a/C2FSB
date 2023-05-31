@@ -19,8 +19,7 @@
 *   Weather structure
 */
 typedef struct
-   { std::string instance, datetime;
-      float ws, waz;
+   { float ws, waz;
    } weatherDF;
    
  /*

@@ -216,7 +216,6 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr, std::vector<std::vector<std:
 	int i;
 	
 	//Strings
-	std::string instance, datetime;
 	std::string::size_type sz;   // alias of size_t
 	
 	//Floats 
@@ -226,9 +225,6 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr, std::vector<std::vector<std:
 	// Loop over cells (populating per row)
 	for (i=1; i <= WPeriods; i++){
 		//printf("Populating Weather DF period %d\n", i);
-		instance = DF[i][0];
-		datetime = DF[i][1];
-		
 		if (DF[i][3].compare("") == 0) waz = 0;
 		else {waz = std::stoi (DF[i][3] ,&sz); //+ 180/2;   // DEBUGGING THE ANGLE 
 			if (waz >= 360){
@@ -241,8 +237,6 @@ void CSVReader::parseWeatherDF(weatherDF * wdf_ptr, std::vector<std::vector<std:
 		
 		
 		// Set values
-		wdf_ptr->instance = instance;
-		wdf_ptr->datetime = datetime;
 		wdf_ptr->ws=ws; wdf_ptr->waz=waz; 
 			
 		// Next pointer
