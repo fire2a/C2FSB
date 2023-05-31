@@ -19,7 +19,6 @@ typedef struct
    { char fueltype[4];
      float ws, saz, cur, ps, cbh, ccf, cbd, elev ;
      int waz, nftype,fmc;
-     float factor_cbd, factor_ccf, factor_ros10, factor_actv ;
    } inputs;
 
 
@@ -80,7 +79,7 @@ float byram_intensity(inputs* data, fuel_coefs* ptr);
 bool fire_type(inputs *data, fuel_coefs *ptr) ;
 
 // CROS adjustements
-float rate_of_spread10(inputs *data) ;
+float rate_of_spread10(inputs *data,arguments *args) ;
 
 bool checkActive(inputs * data,main_outs* at);
 float crownfractionburn(inputs* data, main_outs* at);

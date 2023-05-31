@@ -2305,19 +2305,19 @@ bool fire_type(inputs* data, main_outs* at)
 }
 
 
-float rate_of_spread10(inputs *data)
+float rate_of_spread10(inputs *data, arguments *args)
    {
    // FM 10 coef
    float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123 ;
    float ros, ros10, ws, ffros, fcbd, fccf;
 
-   ffros = data->factor_ros10 ;
-   fcbd  = data->factor_cbd ;
-   fccf  = data->factor_ccf ;
+   ffros = args->ROS10Factor ;
+   fcbd  = args->CBDFactor ;
+   fccf  = args->CCFFactor ;
    
    ws = data->ws ;
    ros10 = 1. / (p1 * exp(-p2 * ws) + p3) ;
-   ros = ffros * ros10 + fccf * data->ccf + fcbd * data->factor_cbd ;
+   ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor ;
    
    return(ros);
    }
@@ -2394,7 +2394,6 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 	// Aux
 	float  ros, bros, lb, fros;
 	bool crownFire=false;
-    
     // Populate fuel coefs struct
 	//ptr->fueltype = data->fueltype;
 	if (args->verbose){
@@ -2443,7 +2442,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 	// Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
 	if (args->AllowCROS && data->cbh!=0 && data->cbd!=0) {
 		if (activeCrown){
-		at->ros_active=rate_of_spread10(data);
+		at->ros_active=rate_of_spread10(data,args);
 		if (!checkActive(data,at)) {
 			activeCrown=false;
 			}
@@ -2464,7 +2463,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 
 	// If we have Crown fire, update the ROSs
     if (crownFire){
-            at->ros_active=rate_of_spread10(data);
+            at->ros_active=rate_of_spread10(data,args);
             at->cfb = crownfractionburn(data, at);
 
             hptr->ros = final_rate_of_spread10(data,at) ;

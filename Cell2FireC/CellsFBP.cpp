@@ -320,10 +320,6 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 	// Populate Inputs 
 	df_ptr[this->realId-1].waz = wdf_ptr->waz;
 	df_ptr[this->realId-1].ws = wdf_ptr->ws;
-	df_ptr[this->realId-1].factor_cbd = args->CBDFactor;   
-	df_ptr[this->realId-1].factor_ccf = args->CCFFactor;
-	df_ptr[this->realId-1].factor_ros10 = args->ROS10Factor;
-	df_ptr[this->realId-1].factor_actv = args->CROSActThreshold;
 
 	// Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct, metrics;
@@ -561,10 +557,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 	// Populate inputs 
 	df_ptr->waz = wdf_ptr->waz;
 	df_ptr->ws = wdf_ptr->ws;
-	df_ptr->factor_cbd = args->CBDFactor;   
-	df_ptr->factor_ccf = args->CCFFactor;
-	df_ptr->factor_ros10 = args->ROS10Factor;
-	df_ptr->factor_actv = args->CROSActThreshold;
+
 	
 	// Calculate parameters
 	calculate(df_ptr, coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
@@ -782,10 +775,6 @@ bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_c
 	// Compute main angle and ROSs: forward, flanks and back
 	df[this->id].waz = wdf_ptr->waz;
 	df[this->id].ws = wdf_ptr->ws;
-	df[this->id].factor_cbd = args->CBDFactor;   
-	df[this->id].factor_ccf = args->CCFFactor;
-	df[this->id].factor_ros10 = args->ROS10Factor;
-	df[this->id].factor_actv = args->CROSActThreshold;
 	
 	// Calculate
 	calculate(&(df[this->id]), coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
@@ -881,10 +870,6 @@ bool CellsFBP::ignition(int period, int year, std::vector<int> & ignitionPoints,
 		// Populate inputs 
 		df_ptr->waz = wdf_ptr->waz;
 		df_ptr->ws = wdf_ptr->ws;
-		df_ptr->factor_cbd = args->CBDFactor;   
-		df_ptr->factor_ccf = args->CCFFactor;
-		df_ptr->factor_ros10 = args->ROS10Factor;
-		df_ptr->factor_actv = args->CROSActThreshold;
 			
         calculate(df_ptr, coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 
