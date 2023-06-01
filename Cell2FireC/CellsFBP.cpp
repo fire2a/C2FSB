@@ -29,8 +29,7 @@ using namespace std;
 */
 CellsFBP::CellsFBP(int _id, double _area, std::vector<int> _coord,  
 							int _fType, std::string _fType2, double _perimeter, 
-							int _status, std::unordered_map<std::string, int> & _adjacents, 
-							int _realId)
+							int _status,int _realId)
 {
 	// Global "dictionaries" (vectors) for status and types
 	// Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non Fuel"
@@ -53,7 +52,6 @@ CellsFBP::CellsFBP(int _id, double _area, std::vector<int> _coord,
     this->fType2 = _fType2;
     this->perimeter = _perimeter;
     this->status = _status;
-    this->adjacents = _adjacents;
     this->realId = _realId;
     this->_ctr2ctrdist = std::sqrt(this->area);
 
@@ -92,14 +90,16 @@ CellsFBP::CellsFBP(int _id, double _area, std::vector<int> _coord,
     AvailSet       int set
 */
 void CellsFBP::initializeFireFields(std::vector<std::vector<int>> & coordCells,    // TODO: should probably make a coordinate type
-												std::unordered_set<int> & availSet) 				// WORKING CHECK OK
+												std::unordered_set<int> & availSet,int cols, int rows) 				// WORKING CHECK OK
 {  
-    for (auto & nb : this->adjacents) {
+	std::vector<int> adj=adjacentCells(this->id,rows,cols);
+
+    for (auto & nb : adj) {
         // CP Default value is replaced: None = -1
 		//std::cout << "DEBUG1: adjacent: " << nb.second << std::endl;
-        if (nb.second != -1) {
-            int a = -1 * coordCells[nb.second - 1][0] + coordCells[this->id][0];
-            int b = -1 * coordCells[nb.second - 1][1] + coordCells[this->id][1];
+        if (nb != -1) {
+            int a = -1 * coordCells[nb - 1][0] + coordCells[this->id][0];
+            int b = -1 * coordCells[nb - 1][1] + coordCells[this->id][1];
             
             int angle = -1;
             if (a == 0) {
@@ -125,20 +125,35 @@ void CellsFBP::initializeFireFields(std::vector<std::vector<int>> & coordCells, 
                     temp += 360;
                 angle = temp;
             }
-
-            this->angleDict[nb.second] = angle;
-            if (availSet.find(nb.second) != availSet.end()) {
+            this->angleDict[nb] = angle;
+            if (availSet.find(nb) != availSet.end()) {
                 // TODO: cannot be None, replaced None = -1   and ROSAngleDir has a double inside 
                 this->ROSAngleDir[angle] = -1;
             }
-            this->angleToNb[angle] = nb.second;
-            this->fireProgress[nb.second] = 0.0;
-            this->distToCenter[nb.second] = std::sqrt(a * a + b * b) * this->_ctr2ctrdist;
+            this->angleToNb[angle] = nb;
+            this->fireProgress[nb] = 0.0;
+            this->distToCenter[nb] = std::sqrt(a * a + b * b) * this->_ctr2ctrdist;
         }
     }
 }
 
-        
+std::vector<int> adjacentCells(int cell, int nrows, int ncols){
+    if (cell<=0 || cell>nrows*ncols){
+        std::vector<int> adjacents(8,-1);
+        return adjacents;
+    }
+	int total_cells=nrows*ncols;
+    int north= cell<=ncols ? -1: cell-ncols;
+    int south= cell+ncols>total_cells? -1:cell+ncols;
+    int east= cell%ncols==0? -1:cell+1;
+    int west=cell%ncols==1? -1:cell-1;
+    int northeast=cell<ncols || cell%ncols==0? -1: cell-ncols+1;
+    int southeast=cell+ncols>total_cells || cell%ncols==0?-1:cell+ncols+1;
+    int southwest=cell%ncols==1 || cell+ncols>total_cells? -1:cell+ncols-1 ;
+    int northwest=cell%ncols==1 || cell<ncols? -1:cell-ncols-1 ;
+	std::vector<int> adjacents={north,northeast,northwest,south,southeast,southwest,east,west};
+	return adjacents;
+} 
 		
 /*
     New functions for calculating the ROS based on the fire angles
@@ -806,10 +821,10 @@ bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_c
     Inputs:  
     AdjacentCells      dictionary{string:[array integers]}
 */
-void CellsFBP::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {   // WORKING CHECK OK
-    // TODO: in python, these are pointers, maybe make these pointers too :P
-    this->adjacents = adjacentCells;
-}
+//void CellsFBP::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {   // WORKING CHECK OK
+//    // TODO: in python, these are pointers, maybe make these pointers too :P
+//    this->adjacents = adjacentCells;
+//}
 
 
 /* 
@@ -928,9 +943,9 @@ void CellsFBP::print_info() {    // WORKING CHECK OK
 	std::cout << "Area = "<<  this->area << std::endl;
     std::cout << "FTypes = "<< this->FTypeD[this->fType] << std::endl;
     std::cout << "AdjacentCells:";
-	for (auto & nb : this->adjacents){
-		std::cout << " " << nb.first << ":" << nb.second;
-	}
+	//for (auto & nb : this->adjacents){
+	//	std::cout << " " << nb.first << ":" << nb.second;
+	//}
 	std::cout << std::endl;
 	
 	printf("Angle Dict: ");
