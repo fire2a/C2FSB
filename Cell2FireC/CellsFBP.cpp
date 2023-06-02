@@ -92,7 +92,7 @@ CellsFBP::CellsFBP(int _id, double _area, std::vector<int> _coord,
 void CellsFBP::initializeFireFields(std::vector<std::vector<int>> & coordCells,    // TODO: should probably make a coordinate type
 												std::unordered_set<int> & availSet,int cols, int rows) 				// WORKING CHECK OK
 {  
-	std::vector<int> adj=adjacentCells(this->id,rows,cols);
+	std::vector<int> adj=adjacentCells(this->realId,rows,cols);
 
     for (auto & nb : adj) {
         // CP Default value is replaced: None = -1
@@ -151,7 +151,8 @@ std::vector<int> adjacentCells(int cell, int nrows, int ncols){
     int southeast=cell+ncols>total_cells || cell%ncols==0?-1:cell+ncols+1;
     int southwest=cell%ncols==1 || cell+ncols>total_cells? -1:cell+ncols-1 ;
     int northwest=cell%ncols==1 || cell<ncols? -1:cell-ncols-1 ;
-	std::vector<int> adjacents={north,northeast,northwest,south,southeast,southwest,east,west};
+	std::vector<int> adjacents={west,east,southwest,southeast,south,northwest,northeast,north};
+
 	return adjacents;
 } 
 		
