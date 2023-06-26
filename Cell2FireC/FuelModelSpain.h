@@ -1,6 +1,6 @@
 #ifndef FUELMODELSPAIN
 #define FUELMODELSPAIN
-
+#include "ReadArgs.h"
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -18,9 +18,7 @@
 typedef struct
    { char fueltype[4];
      float ws, saz, cur, ps, cbh, ccf, cbd, elev ;
-     int waz, scen, nftype,fmc;
-     float factor_cbd, factor_ccf, factor_ros10, factor_actv ;
-     bool cros, verbose;
+     int waz, nftype,fmc;
    } inputs;
 
 
@@ -81,7 +79,7 @@ float byram_intensity(inputs* data, fuel_coefs* ptr);
 bool fire_type(inputs *data, fuel_coefs *ptr) ;
 
 // CROS adjustements
-float rate_of_spread10(inputs *data) ;
+float rate_of_spread10(inputs *data,arguments *args) ;
 
 bool checkActive(inputs * data,main_outs* at);
 float crownfractionburn(inputs* data, main_outs* at);
@@ -93,9 +91,9 @@ float backfire_ros10(fire_struc *hptr, snd_outs *sec) ;
 float slope_effect(inputs * data);
 
 // Main function to populate spread outputs based on inputs provided from main class
-void calculate(inputs *data,  fuel_coefs * ptr, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr,bool & activeCrown);
+void calculate(inputs *data,  fuel_coefs * ptr,arguments *args, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr,bool & activeCrown);
 
-void determine_destiny_metrics(inputs* data, fuel_coefs* ptr, main_outs* at);
+void determine_destiny_metrics(inputs* data, fuel_coefs* ptr,arguments *args, main_outs* at);
 
 
 #endif

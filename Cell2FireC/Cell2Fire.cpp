@@ -38,8 +38,8 @@ using namespace std;
 // Global Variables (DFs with cells and weather info)
 inputs * df_ptr;
 weatherDF * wdf_ptr;
-weatherDF wdf[1000000];
-inputs df [9000000];
+weatherDF wdf[100000]; //hard to dynamic allocate memory since it changes from file to file, better to keep constant size;
+inputs * df;
 std::unordered_map<int, std::vector<float>> BBOFactors;
 std::unordered_map<int, std::vector<int>> HarvestedCells;   
 std::vector<int> NFTypesCells;
@@ -161,7 +161,7 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	this->yllcorner = frdf.yllcorner;
 
 	this->coordCells = frdf.coordCells;
-	this->adjCells = frdf.adjCells;
+	//this->adjCells = frdf.adjCells;
 	
 	/********************************************************************
 							Dataframes initialization: Forest and Weather
@@ -178,7 +178,8 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 	std::cout << "Forest DataFrame from instance " << filename << std::endl;
 	//DEBUGCSVParser.printData(DF);
 	std::cout << "Number of cells: " <<  this->nCells  << std::endl;
-	
+	df = new inputs[this->nCells];
+
 	// Create empty df with size of NCells
 	df_ptr = & df[0]; //access reference for the first element of df
 
@@ -324,12 +325,12 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 			for (i=0; i<this->args.TotalYears; i++){
 				auxSet.clear();
 				igVal = this->IgnitionPoints[i];
-				
+				std::vector<int> adjacenCells=adjacentCells(igVal, this->rows, this->cols);
 				if (this->args.IgnitionRadius == 1){
-					for (auto & nb : adjCells[igVal-1]) {
-						if (nb.second != -1) {
+					for (auto & nb : adjacenCells) {
+						if (nb != -1) {
 								//this->IgnitionSets[auxIg].insert(nb.second);
-								this->IgnitionSets[auxIg].push_back(nb.second);
+								this->IgnitionSets[auxIg].push_back(nb);
 						}
 					}
 					//this->IgnitionSets[auxIg].insert(igVal);
@@ -338,10 +339,10 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 				
 				if (this->args.IgnitionRadius > 1){
 					// Initial ignition set (first year for 1 degree)
-					for (auto & nb : adjCells[igVal-1]) {
-						if (nb.second != -1) {
+					for (auto & nb : adjacenCells) {
+						if (nb != -1) {
 								//this->IgnitionSets[auxIg].insert(nb.second);
-								this->IgnitionSets[auxIg].push_back(nb.second);
+								this->IgnitionSets[auxIg].push_back(nb);
 						}
 					}
 					int auxR = 1;
@@ -355,10 +356,11 @@ Cell2Fire::Cell2Fire(arguments _args) : CSVWeather(_args.InFolder + "Weather.csv
 						
 						for (auto & c : IgnitionSetsAux) {
 							// Populate Aux Set
-							for (auto & na : adjCells[c - 1]) {
-								if (na.second != -1) {
+							std::vector<int> adjacenCells=adjacentCells(c, this->rows, this->cols);
+							for (auto & na : adjacenCells) {
+								if (na != -1) {
 										//auxSet.insert(na.second);
-										auxSet.push_back(na.second);
+										auxSet.push_back(na);
 								}
 							}
 						}
@@ -449,14 +451,14 @@ void Cell2Fire::InitCell(int id){
 	
 	// Initialize cell, insert it inside the unordered map
 	CellsFBP Cell(id-1, this->areaCells,  this->coordCells[id-1],  this->fTypeCells[id-1],  this->fTypeCells2[id-1], 
-						this->perimeterCells, this->statusCells[id-1], this->adjCells[id-1], id);
+						this->perimeterCells, this->statusCells[id-1], id);
 	this->Cells_Obj.insert(std::make_pair(id, Cell));							 
 									
 	// Get object from unordered map
 	it2 = this->Cells_Obj.find(id);
 	
 	// Initialize the fire fields for the selected cel
-	it2->second.initializeFireFields(this->coordCells, this->availCells);
+	it2->second.initializeFireFields(this->coordCells, this->availCells,this->cols,this->rows);
 	
 	// Print info for debugging
 	if (this->args.verbose) it2->second.print_info();
@@ -1672,6 +1674,7 @@ int main(int argc, char* argv[]) {
 	int num_threads = args.nthreads;
 	int TID = 0;
 
+	
 	Cell2Fire Forest2(args); //generate Forest object
 	std::vector<Cell2Fire> Forests(num_threads, Forest2);
 
@@ -1745,6 +1748,7 @@ int main(int argc, char* argv[]) {
 
 		}
 	}
+	delete [] df;
 	return 0;
 }
 

@@ -29,8 +29,7 @@ using namespace std;
 */
 CellsFBP::CellsFBP(int _id, double _area, std::vector<int> _coord,  
 							int _fType, std::string _fType2, double _perimeter, 
-							int _status, std::unordered_map<std::string, int> & _adjacents, 
-							int _realId)
+							int _status,int _realId)
 {
 	// Global "dictionaries" (vectors) for status and types
 	// Status: 0: "Available", 1: "Burning", 2: "Burnt", 3: "Harvested", 4:"Non Fuel"
@@ -53,7 +52,6 @@ CellsFBP::CellsFBP(int _id, double _area, std::vector<int> _coord,
     this->fType2 = _fType2;
     this->perimeter = _perimeter;
     this->status = _status;
-    this->adjacents = _adjacents;
     this->realId = _realId;
     this->_ctr2ctrdist = std::sqrt(this->area);
 
@@ -92,14 +90,16 @@ CellsFBP::CellsFBP(int _id, double _area, std::vector<int> _coord,
     AvailSet       int set
 */
 void CellsFBP::initializeFireFields(std::vector<std::vector<int>> & coordCells,    // TODO: should probably make a coordinate type
-												std::unordered_set<int> & availSet) 				// WORKING CHECK OK
+												std::unordered_set<int> & availSet,int cols, int rows) 				// WORKING CHECK OK
 {  
-    for (auto & nb : this->adjacents) {
+	std::vector<int> adj=adjacentCells(this->realId,rows,cols);
+
+    for (auto & nb : adj) {
         // CP Default value is replaced: None = -1
 		//std::cout << "DEBUG1: adjacent: " << nb.second << std::endl;
-        if (nb.second != -1) {
-            int a = -1 * coordCells[nb.second - 1][0] + coordCells[this->id][0];
-            int b = -1 * coordCells[nb.second - 1][1] + coordCells[this->id][1];
+        if (nb != -1) {
+            int a = -1 * coordCells[nb - 1][0] + coordCells[this->id][0];
+            int b = -1 * coordCells[nb - 1][1] + coordCells[this->id][1];
             
             int angle = -1;
             if (a == 0) {
@@ -125,20 +125,36 @@ void CellsFBP::initializeFireFields(std::vector<std::vector<int>> & coordCells, 
                     temp += 360;
                 angle = temp;
             }
-
-            this->angleDict[nb.second] = angle;
-            if (availSet.find(nb.second) != availSet.end()) {
+            this->angleDict[nb] = angle;
+            if (availSet.find(nb) != availSet.end()) {
                 // TODO: cannot be None, replaced None = -1   and ROSAngleDir has a double inside 
                 this->ROSAngleDir[angle] = -1;
             }
-            this->angleToNb[angle] = nb.second;
-            this->fireProgress[nb.second] = 0.0;
-            this->distToCenter[nb.second] = std::sqrt(a * a + b * b) * this->_ctr2ctrdist;
+            this->angleToNb[angle] = nb;
+            this->fireProgress[nb] = 0.0;
+            this->distToCenter[nb] = std::sqrt(a * a + b * b) * this->_ctr2ctrdist;
         }
     }
 }
 
-        
+std::vector<int> adjacentCells(int cell, int nrows, int ncols){
+    if (cell<=0 || cell>nrows*ncols){
+        std::vector<int> adjacents(8,-1);
+        return adjacents;
+    }
+	int total_cells=nrows*ncols;
+    int north= cell<=ncols ? -1: cell-ncols;
+    int south= cell+ncols>total_cells? -1:cell+ncols;
+    int east= cell%ncols==0? -1:cell+1;
+    int west=cell%ncols==1? -1:cell-1;
+    int northeast=cell<ncols || cell%ncols==0? -1: cell-ncols+1;
+    int southeast=cell+ncols>total_cells || cell%ncols==0?-1:cell+ncols+1;
+    int southwest=cell%ncols==1 || cell+ncols>total_cells? -1:cell+ncols-1 ;
+    int northwest=cell%ncols==1 || cell<ncols? -1:cell-ncols-1 ;
+	std::vector<int> adjacents={west,east,southwest,southeast,south,northwest,northeast,north};
+
+	return adjacents;
+} 
 		
 /*
     New functions for calculating the ROS based on the fire angles
@@ -320,13 +336,6 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 	// Populate Inputs 
 	df_ptr[this->realId-1].waz = wdf_ptr->waz;
 	df_ptr[this->realId-1].ws = wdf_ptr->ws;
-	df_ptr[this->realId-1].scen = args->scenario;
-	df_ptr[this->realId-1].factor_cbd = args->CBDFactor;   
-	df_ptr[this->realId-1].factor_ccf = args->CCFFactor;
-	df_ptr[this->realId-1].factor_ros10 = args->ROS10Factor;
-	df_ptr[this->realId-1].factor_actv = args->CROSActThreshold;
-	df_ptr[this->realId-1].cros = args->AllowCROS;
-	df_ptr[this->realId-1].verbose = args->verbose;
 
 	// Compute main angle and ROSs: forward, flanks and back
     main_outs mainstruct, metrics;
@@ -334,7 +343,7 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
     fire_struc headstruct, backstruct, flankstruct;
 
 	// Calculate parameters
-	calculate(&df_ptr[this->realId-1], coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+	calculate(&df_ptr[this->realId-1], coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 	
 	/*  ROSs DEBUG!   */
 	if(args->verbose){
@@ -351,8 +360,6 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 		std::cout <<  "cbd: " << df_ptr[this->realId-1].cbd << std::endl;
 		std::cout <<  "cbh: " << df_ptr[this->realId-1].cbh << std::endl;
 		std::cout <<  "ccf: " << df_ptr[this->realId-1].ccf << std::endl;
-		std::cout <<  "scen: " << df_ptr[this->realId-1].scen << std::endl;
-		std::cout <<  "cros: " << df_ptr[this->realId-1].cros << std::endl;
 		std::cout <<  "\n-------Mainout Structure--------" << std::endl;
 		std::cout << "rss: " << mainstruct.rss << std::endl;
 		std::cout << "angle: " << mainstruct.angle << std::endl;
@@ -476,7 +483,9 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				FSCell->push_back(double(nb));
 				FSCell->push_back(double(period));
 				FSCell->push_back(std::ceil(ros * 100.0) / 100.0);
-				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
+				df_ptr[nb-1].waz = wdf_ptr->waz;
+				df_ptr[nb-1].ws = wdf_ptr->ws;
+				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef,args, &metrics);
 				crownState[this->realId-1]=mainstruct.cros;
 				crownState[nb-1]=metrics.cros;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
@@ -485,8 +494,8 @@ std::vector<int> CellsFBP::manageFire(int period, std::unordered_set<int> & Avai
 				Intensities[nb-1]=metrics.byram;
 				crownFraction[this->realId-1]=mainstruct.cfb;
 				crownFraction[nb-1]=metrics.cfb;
-		    		FlameLengths[this->realId-1]=mainstruct.fl;
-			    	FlameLengths[nb-1]=metrics.fl;
+		    	FlameLengths[this->realId-1]=mainstruct.fl;
+			    FlameLengths[nb-1]=metrics.fl;
 
                 // cannot mutate ROSangleDir during iteration.. we do it like 10 lines down
                // toPop.push_back(angle);
@@ -564,15 +573,10 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 	// Populate inputs 
 	df_ptr->waz = wdf_ptr->waz;
 	df_ptr->ws = wdf_ptr->ws;
-	df_ptr->scen = args->scenario;
-	df_ptr->factor_cbd = args->CBDFactor;   
-	df_ptr->factor_ccf = args->CCFFactor;
-	df_ptr->factor_ros10 = args->ROS10Factor;
-	df_ptr->factor_actv = args->CROSActThreshold;
-	df_ptr->cros = args->AllowCROS;
+
 	
 	// Calculate parameters
-	calculate(df_ptr, coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+	calculate(df_ptr, coef, args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 	
 	/*  ROSs DEBUG!   */
 	if(args->verbose){
@@ -698,7 +702,7 @@ std::vector<int> CellsFBP::manageFireBBO(int period, std::unordered_set<int> & A
 				FSCell->push_back(double(nb));
 				FSCell->push_back(double(period));
 				FSCell->push_back(ros);
-				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef, &metrics);
+				determine_destiny_metrics(&df_ptr[int(nb) - 1], coef,args, &metrics);
 				crownState[this->realId-1]=mainstruct.cros;
 				crownState[nb-1]=metrics.cros;
 				RateOfSpreads[this->realId-1]=double(std::ceil(ros * 100.0) / 100.0);
@@ -787,15 +791,9 @@ bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_c
 	// Compute main angle and ROSs: forward, flanks and back
 	df[this->id].waz = wdf_ptr->waz;
 	df[this->id].ws = wdf_ptr->ws;
-	df[this->id].scen = args->scenario;
-	df[this->id].factor_cbd = args->CBDFactor;   
-	df[this->id].factor_ccf = args->CCFFactor;
-	df[this->id].factor_ros10 = args->ROS10Factor;
-	df[this->id].factor_actv = args->CROSActThreshold;
-	df[this->id].cros = args->AllowCROS;
 	
 	// Calculate
-	calculate(&(df[this->id]), coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
+	calculate(&(df[this->id]), coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct, activeCrown);
 
     if (args->verbose) { 
 		std::cout << "\nMain Angle :" << wdf_ptr->waz << std::endl;
@@ -824,10 +822,10 @@ bool CellsFBP::get_burned(int period, int season, int NMsg, inputs df[],  fuel_c
     Inputs:  
     AdjacentCells      dictionary{string:[array integers]}
 */
-void CellsFBP::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {   // WORKING CHECK OK
-    // TODO: in python, these are pointers, maybe make these pointers too :P
-    this->adjacents = adjacentCells;
-}
+//void CellsFBP::set_Adj(std::unordered_map<std::string, int> & adjacentCells) {   // WORKING CHECK OK
+//    // TODO: in python, these are pointers, maybe make these pointers too :P
+//    this->adjacents = adjacentCells;
+//}
 
 
 /* 
@@ -888,14 +886,8 @@ bool CellsFBP::ignition(int period, int year, std::vector<int> & ignitionPoints,
 		// Populate inputs 
 		df_ptr->waz = wdf_ptr->waz;
 		df_ptr->ws = wdf_ptr->ws;
-		df_ptr->scen = args->scenario;
-		df_ptr->factor_cbd = args->CBDFactor;   
-		df_ptr->factor_ccf = args->CCFFactor;
-		df_ptr->factor_ros10 = args->ROS10Factor;
-		df_ptr->factor_actv = args->CROSActThreshold;
-		df_ptr->cros = args->AllowCROS;
 			
-        calculate(df_ptr, coef, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
+        calculate(df_ptr, coef,args, &mainstruct, &sndstruct, &headstruct, &flankstruct, &backstruct,activeCrown);
 
         if (args->verbose) {
 			std::cout << "\nIn ignition function" << std::endl;
@@ -952,9 +944,9 @@ void CellsFBP::print_info() {    // WORKING CHECK OK
 	std::cout << "Area = "<<  this->area << std::endl;
     std::cout << "FTypes = "<< this->FTypeD[this->fType] << std::endl;
     std::cout << "AdjacentCells:";
-	for (auto & nb : this->adjacents){
-		std::cout << " " << nb.first << ":" << nb.second;
-	}
+	//for (auto & nb : this->adjacents){
+	//	std::cout << " " << nb.first << ":" << nb.second;
+	//}
 	std::cout << std::endl;
 	
 	printf("Angle Dict: ");
