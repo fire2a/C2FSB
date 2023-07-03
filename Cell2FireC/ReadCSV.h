@@ -19,8 +19,7 @@
 *   Weather structure
 */
 typedef struct
-   { std::string instance, datetime;
-      float ws, waz;
+   { float ws, waz;
    } weatherDF;
    
  /*
@@ -29,7 +28,7 @@ typedef struct
 typedef struct
    { int cellside, rows, cols;
 	double xllcorner, yllcorner;
-      std::vector<std::unordered_map<std::string, int>> adjCells;
+      //std::vector<std::unordered_map<std::string, int>> adjCells;
 	  std::vector<std::vector<int>> coordCells;
    } forestDF;
 

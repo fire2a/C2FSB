@@ -72,7 +72,7 @@ class GenHeur(object):
             return ncomponents
         """
         Given an individual, calculate the total fitness function as:
-        Fitness = + FPV firebrea: total FPV value firebreak
+        Fitness = + FPV firebreak: total FPV value firebreak
                   - Demand deviation: penalty w.r.t. the extra/lower demand satisfaction
                   - Adjacency penalty: if cells are not adjacent (connected graph), 
                                        penalyze by the number of non-connected components

@@ -1,7 +1,6 @@
 // Class inclusions
 #include "SpottingFBP.h"
 #include "CellsFBP.h" 
-
 // Include libraries
 #include <stdio.h>
 #include <string>

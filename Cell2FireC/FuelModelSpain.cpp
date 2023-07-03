@@ -1,5 +1,5 @@
 #include "FuelModelSpain.h"
-
+#include "ReadArgs.h"
 #include <iostream>
 #include <math.h>
 #include <cmath>
@@ -2305,19 +2305,19 @@ bool fire_type(inputs* data, main_outs* at)
 }
 
 
-float rate_of_spread10(inputs *data)
+float rate_of_spread10(inputs *data, arguments *args)
    {
    // FM 10 coef
    float p1 = 0.2802, p2 = 0.07786, p3 = 0.01123 ;
    float ros, ros10, ws, ffros, fcbd, fccf;
 
-   ffros = data->factor_ros10 ;
-   fcbd  = data->factor_cbd ;
-   fccf  = data->factor_ccf ;
+   ffros = args->ROS10Factor ;
+   fcbd  = args->CBDFactor ;
+   fccf  = args->CCFFactor ;
    
    ws = data->ws ;
    ros10 = 1. / (p1 * exp(-p2 * ws) + p3) ;
-   ros = ffros * ros10 + fccf * data->ccf + fcbd * data->factor_cbd ;
+   ros = ffros * ros10 + fccf * data->ccf + fcbd * args->CBDFactor ;
    
    return(ros);
    }
@@ -2386,21 +2386,20 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 }
 
   
- void calculate(inputs *data,  fuel_coefs * ptr, main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr,bool & activeCrown)
+ void calculate(inputs *data,  fuel_coefs * ptr,arguments *args ,main_outs *at, snd_outs *sec, fire_struc *hptr, fire_struc *fptr,fire_struc *bptr,bool & activeCrown)
 {
     // Hack: Initialize coefficients 
-	initialize_coeff(data->scen);
+	initialize_coeff(args->scenario);
 	
 	// Aux
 	float  ros, bros, lb, fros;
-	bool crownFire;
-    
+	bool crownFire=false;
     // Populate fuel coefs struct
 	//ptr->fueltype = data->fueltype;
-	if (data->verbose){
+	if (args->verbose){
 		std::cout  << "Populate fuel types " <<  std::endl;
 		std::cout  << "NfTypes:"  << data->nftype <<  std::endl;
-		std::cout  << "scen:"  << data->scen <<  std::endl;
+		std::cout  << "scen:"  << args->scenario <<  std::endl;
 	}
 	ptr->p1 = p_coeff[data->nftype][0] ;
     ptr->p2 = p_coeff[data->nftype][1] ;
@@ -2441,16 +2440,16 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 	at->byram = byram_intensity(at, ptr);
 
 	// Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
-	if (data->cros && data->cbh!=0 && data->cbd!=0) {
+	if (args->AllowCROS && data->cbh!=0 && data->cbd!=0) {
 		if (activeCrown){
-		at->ros_active=rate_of_spread10(data);
+		at->ros_active=rate_of_spread10(data,args);
 		if (!checkActive(data,at)) {
 			activeCrown=false;
 			}
 		}
 		else{
 			crownFire=fire_type(data,at);
-			if(data->verbose){
+			if(args->verbose){
 				cout << "Checking crown Fire conditions " << crownFire << "\n";
 
 			}
@@ -2464,14 +2463,14 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 
 	// If we have Crown fire, update the ROSs
     if (crownFire){
-            at->ros_active=rate_of_spread10(data);
+            at->ros_active=rate_of_spread10(data,args);
             at->cfb = crownfractionburn(data, at);
 
             hptr->ros = final_rate_of_spread10(data,at) ;
             at->rss=hptr->ros;
             bptr->ros = backfire_ros10(hptr,sec) ;
             fptr->ros = flankfire_ros(hptr->ros, bptr->ros, sec->lb) ;
-			if (data->verbose){
+			if (args->verbose){
 				cout << "hptr->ros = " << hptr->ros << "\n" ;
 				cout << "bptr->ros = " << bptr->ros << "\n" ;
 				cout << "fptr->ros = " << fptr->ros << "\n" ;
@@ -2492,7 +2491,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
             bptr->ros = backfire_ros10(hptr,sec) ;
             fptr->ros = flankfire_ros(hptr->ros, bptr->ros, sec->lb) ;
             
-			if (data->verbose){
+			if (args->verbose){
 				cout << "hptr->ros = " << hptr->ros << "\n" ;
 				cout << "bptr->ros = " << bptr->ros << "\n" ;
 				cout << "fptr->ros = " << fptr->ros << "\n" ;
@@ -2515,7 +2514,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
         hptr->ros = hptr->rss ;
         bptr->ros = bptr->rss ; 
         fptr->ros = fptr->rss ;
-		if (data->verbose){
+		if (args->verbose){
 			cout << "hptr->ros = " << hptr->ros << "\n" ;
 			cout << "bptr->ros = " << bptr->ros << "\n" ;
 			cout << "fptr->ros = " << fptr->ros << "\n" ;
@@ -2527,7 +2526,7 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 
 	//}
 
-	if (data->verbose){
+	if (args->verbose){
 		cout << "--------------- Inputs --------------- \n" ;
 		cout << "ws = " << data->ws << "\n" ;
 		cout << "coef data->cbh = " << data->cbh << "\n" ;
@@ -2555,9 +2554,9 @@ bool checkActive(inputs * data,main_outs* at) //En s&b se usa fm10
 	}
 }
 
-void determine_destiny_metrics(inputs* data, fuel_coefs* ptr, main_outs* metrics) {
+void determine_destiny_metrics(inputs* data, fuel_coefs* ptr,arguments *args, main_outs* metrics) {
 	// Hack: Initialize coefficients 
-	initialize_coeff(data->scen);
+	initialize_coeff(args->scenario);
 
 	// Aux
 	float  ros=0, bros=0, lb=0, fros=0;
@@ -2573,13 +2572,13 @@ void determine_destiny_metrics(inputs* data, fuel_coefs* ptr, main_outs* metrics
 	//Set cfb value for no crown fire scenario
 	metrics->cfb =0;
     // Step 10: Criterion for Crown Fire Initiation (no init if user does not want to include it)
-    if (data->cros) {
+    if (args->AllowCROS) {
         crownFire = fire_type(data, metrics);
         if (crownFire){
             metrics->cfb = crownfractionburn(data, metrics);
 
         }
-        if (data->verbose) {
+        if (args->verbose) {
             cout << "Checking crown Fire conditions " << crownFire << "\n";
         }
     }
